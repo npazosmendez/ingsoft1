@@ -1,0 +1,27 @@
+El objetivo de este ejercicio es que implementen la suma, multiplicación y
+división entre números enteros y fraccionarios.
+La solución final no debe tener if en los métodos que deben implementar y todos
+los test deben funcionar.
+Los tests ni su septup no pueden ser modificados.
+
+Como podrán ver cuando corran los tests, es que hay varios que funcionan y son
+los correpondientes a cuando se opera aritméticamente entre números del mimos
+tipo, o sea entre enteros o entre fracciones. Los test que fallan son los
+relacionados a las operaciones enter números de distinto tipo, o sea entre
+enteros y fraccions y viceversa.
+
+Ayuda:
+Antes de emperzar a resolver el problema, debuggeen los tests que funcionan para
+entender cómo es el modelo que se esta presentando, analicen las clases Número,
+Entero y Fraccion
+Una vez que se sientan cómodos con el modelo, hagan pasar todos los tests
+implementando lo necesario utilizando ifs.
+Una vez que los tests pasen, apliquen el algoritmo que vimos en clase para
+reemplazar if por polimorfismo
+
+Desafío Adicional:
+Aquellos que estén interesados en llevar al extremo el reemplazo de if por
+polimorfismo, trate de sacar los ifs que ya venian en el ejercicio inicial
+y que tiene que ver con que no se puede dividir por cero, que el denominiador
+no puede ser uno, etc. Las soluciones a este desafío son muy interesantes y
+distintas en para lenguajes de prototipación (ej. javascript) y clasificacion
