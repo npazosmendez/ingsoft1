@@ -5,7 +5,7 @@ TestCase subclass: #NumeroTest
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!NumeroTest methodsFor: 'tests' stamp: 'HernanWilkinson 5/7/2016 20:11'!
+!NumeroTest methodsFor: 'tests' stamp: 'DR 4/22/2018 17:48:01'!
 test01isCeroReturnsTrueWhenAskToZero
 
 	self assert: zero isZero! !
@@ -347,13 +347,67 @@ sumarFraccion: unSumandoFraccional
 Entero class
 	instanceVariableNames: ''!
 
-!Entero class methodsFor: 'instance creation' stamp: 'HernanWilkinson 5/7/2016 22:53'!
+!Entero class methodsFor: 'instance creation' stamp: 'DR 4/22/2018 17:53:14'!
 with: aValue 
 	
 	"Esta verificacion esta puesta por si se equivocan y quieren crear un Entero pasando otra cosa que un Integer - Hernan"
 	aValue isInteger ifFalse: [  self error: 'aValue debe ser anInteger' ].
 	
-	^self new initalizeWith: aValue! !
+	aValue = 0 ifTrue: [
+		^Cero new initalizeWith: aValue.
+	] ifFalse: [
+		aValue = 1 ifTrue: [
+			^Uno new initalizeWith: aValue.
+		] ifFalse: [
+			^EnteroMayorAUno new initalizeWith: aValue.
+		]
+	]! !
+
+
+!classDefinition: #Cero category: #'Numero-Exercise'!
+Entero subclass: #Cero
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Cero methodsFor: 'as yet unclassified' stamp: 'DR 4/22/2018 18:02:32'!
+executeIfOne: unClosure! !
+
+!Cero methodsFor: 'as yet unclassified' stamp: 'DR 4/22/2018 18:02:28'!
+executeIfZero: unClosure
+
+	unClosure value.! !
+
+
+!classDefinition: #EnteroMayorAUno category: #'Numero-Exercise'!
+Entero subclass: #EnteroMayorAUno
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!EnteroMayorAUno methodsFor: 'as yet unclassified' stamp: 'DR 4/22/2018 17:55:39'!
+executeIfOne: unClosure! !
+
+!EnteroMayorAUno methodsFor: 'as yet unclassified' stamp: 'DR 4/22/2018 18:01:49'!
+executeIfZero: unClosure! !
+
+
+!classDefinition: #Uno category: #'Numero-Exercise'!
+Entero subclass: #Uno
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Uno methodsFor: 'as yet unclassified' stamp: 'DR 4/22/2018 17:56:09'!
+executeIfOne: unClosure
+
+	unClosure value.! !
+
+!Uno methodsFor: 'as yet unclassified' stamp: 'DR 4/22/2018 18:01:15'!
+executeIfZero: unClosure! !
 
 
 !classDefinition: #Fraccion category: #'Numero-Exercise'!
@@ -468,19 +522,19 @@ numerator
 Fraccion class
 	instanceVariableNames: ''!
 
-!Fraccion class methodsFor: 'intance creation' stamp: 'HernanWilkinson 5/7/2016 20:41'!
+!Fraccion class methodsFor: 'intance creation' stamp: 'DR 4/22/2018 17:35:42'!
 with: aDividend over: aDivisor
 
 	| greatestCommonDivisor numerator denominator |
 	
-	aDivisor isZero ifTrue: [ self error: self canNotDivideByZeroErrorDescription ].
-	aDividend isZero ifTrue: [ ^aDividend ].
+	aDivisor executeIfZero: [ self error: self canNotDivideByZeroErrorDescription ].
+	aDividend executeIfZero: [ ^aDividend ].
 	
 	greatestCommonDivisor := aDividend greatestCommonDivisorWith: aDivisor. 
 	numerator := aDividend // greatestCommonDivisor.
 	denominator := aDivisor // greatestCommonDivisor.
 	
-	denominator isOne ifTrue: [ ^numerator ].
+	denominator executeIfOne: [ ^numerator ].
 
 	^self new initializeWith: numerator over: denominator
 	! !
