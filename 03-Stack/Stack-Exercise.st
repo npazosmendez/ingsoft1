@@ -144,26 +144,40 @@ Object subclass: #OOStack
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!OOStack methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:40:11'!
+!OOStack methodsFor: 'initialization' stamp: 'DR 4/25/2018 00:54:43'!
 initialize
-	top := StackBase new ! !
+	top := StackBase new! !
 
-!OOStack methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:35:34'!
-isEmpty
-	^top isBase! !
 
-!OOStack methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:58:52'!
+!OOStack methodsFor: 'modification' stamp: 'DR 4/25/2018 00:06:08'!
 pop
-	self shouldBeImplemented.! !
+	| previousTop |
+	
+	previousTop := top.
+	top := top objectBelow.
+	^previousTop object
+	! !
 
-!OOStack methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:47:47'!
+!OOStack methodsFor: 'modification' stamp: 'DR 4/25/2018 01:10:16'!
 push: anObjectToPush
 	| aStackedObject |
 	
-	aStackedObject := StackedObject with: anObjectToPush.
-	aStackedObject stackOver: top.
+	aStackedObject := StackedObject with: anObjectToPush stackedOver: top.
 	top := aStackedObject.
 ! !
+
+
+!OOStack methodsFor: 'information' stamp: 'np 4/23/2018 21:35:34'!
+isEmpty
+	^top isBase! !
+
+!OOStack methodsFor: 'information' stamp: 'DR 4/25/2018 00:14:09'!
+size
+	^top countStackedObjects.! !
+
+!OOStack methodsFor: 'information' stamp: 'DR 4/25/2018 00:08:10'!
+top
+	^top object! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -171,9 +185,10 @@ push: anObjectToPush
 OOStack class
 	instanceVariableNames: ''!
 
-!OOStack class methodsFor: 'error descriptions' stamp: 'np 4/23/2018 21:39:45'!
+!OOStack class methodsFor: 'construction' stamp: 'np 4/23/2018 21:39:45'!
 new
 	^self basicNew initialize! !
+
 
 !OOStack class methodsFor: 'error descriptions' stamp: 'HernanWilkinson 5/7/2012 11:51'!
 stackEmptyErrorDescription
@@ -181,34 +196,90 @@ stackEmptyErrorDescription
 	^ 'Stack is empty'! !
 
 
-!classDefinition: #StackBase category: #'Stack-Exercise'!
-Object subclass: #StackBase
+!classDefinition: #StackElement category: #'Stack-Exercise'!
+Object subclass: #StackElement
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!StackBase methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:35:57'!
+!StackElement methodsFor: 'information' stamp: 'DR 4/25/2018 00:51:32'!
+countStackedObjects
+	self subclassResponsibility ! !
+
+!StackElement methodsFor: 'information' stamp: 'DR 4/25/2018 00:51:46'!
+isBase
+	self subclassResponsibility ! !
+
+!StackElement methodsFor: 'information' stamp: 'DR 4/25/2018 00:52:23'!
+object
+	self subclassResponsibility ! !
+
+!StackElement methodsFor: 'information' stamp: 'DR 4/25/2018 00:52:29'!
+objectBelow
+	self subclassResponsibility ! !
+
+
+!classDefinition: #StackBase category: #'Stack-Exercise'!
+StackElement subclass: #StackBase
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Stack-Exercise'!
+
+!StackBase methodsFor: 'information' stamp: 'DR 4/25/2018 00:15:04'!
+countStackedObjects
+	^ 0.! !
+
+!StackBase methodsFor: 'information' stamp: 'np 4/23/2018 21:35:57'!
 isBase
 	^true! !
 
+!StackBase methodsFor: 'information' stamp: 'DR 4/25/2018 00:17:30'!
+object
+	self error: OOStack stackEmptyErrorDescription! !
+
+!StackBase methodsFor: 'information' stamp: 'DR 4/25/2018 00:16:36'!
+objectBelow
+	self error: OOStack stackEmptyErrorDescription! !
+
 
 !classDefinition: #StackedObject category: #'Stack-Exercise'!
-Object subclass: #StackedObject
+StackElement subclass: #StackedObject
 	instanceVariableNames: 'object whatIAmStackedOver'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!StackedObject methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:50:52'!
-initializeWith: anObject
-	object := anObject ! !
+!StackedObject methodsFor: 'initialization' stamp: 'DR 4/25/2018 01:13:53'!
+initializeWith: anObjectToStack stackedOver: aStackedObjectToStandOver
+	object := anObjectToStack.
+	whatIAmStackedOver := aStackedObjectToStandOver.! !
 
-!StackedObject methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:36:07'!
+!StackedObject methodsFor: 'initialization' stamp: 'DR 4/25/2018 01:10:24'!
+with: anObjectToStack stackedOver: aStackedObjectToStandOver
+	object := anObjectToStack.
+	whatIAmStackedOver := aStackedObjectToStandOver.! !
+
+
+!StackedObject methodsFor: 'information' stamp: 'DR 4/25/2018 00:13:49'!
+countStackedObjects
+	^1 + whatIAmStackedOver countStackedObjects! !
+
+!StackedObject methodsFor: 'information' stamp: 'np 4/23/2018 21:36:07'!
 isBase
 	^false! !
 
-!StackedObject methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:58:10'!
+!StackedObject methodsFor: 'information' stamp: 'DR 4/25/2018 00:07:05'!
+object
+	^object! !
+
+!StackedObject methodsFor: 'information' stamp: 'DR 4/25/2018 00:06:44'!
+objectBelow
+	^whatIAmStackedOver! !
+
+
+!StackedObject methodsFor: 'modification' stamp: 'np 4/23/2018 21:58:10'!
 stackOver:  aStackedObjectToStandOver
 	whatIAmStackedOver := aStackedObjectToStandOver.
 	! !
@@ -219,10 +290,6 @@ stackOver:  aStackedObjectToStandOver
 StackedObject class
 	instanceVariableNames: ''!
 
-!StackedObject class methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:51:22'!
-stackOver: aStackBase 
-	self shouldBeImplemented.! !
-
-!StackedObject class methodsFor: 'as yet unclassified' stamp: 'np 4/23/2018 21:56:18'!
-with: anObject
-	^self basicNew initializeWith: anObject! !
+!StackedObject class methodsFor: 'construction' stamp: 'DR 4/25/2018 01:14:31'!
+with: anObjectToStack stackedOver: aStackedObjectToStandOver
+	^self basicNew initializeWith: anObjectToStack stackedOver: aStackedObjectToStandOver! !
