@@ -1,0 +1,16 @@
+El objetivo de este ejercicio es seguir ejercitando como reemplazar if por
+polimorfismo, en particular implementando un Stack.
+
+Hay que hacer pasar todos los tests del ejercicio y la implementacion del
+Stack no debe tener if.
+
+No se pueden modificar los tests.
+
+Ayudas:
+1) Primero hagan pasar todos los tests usando if y despues apliquen la
+tecnica para sacar if que vimos.
+2) Utilicen una metafora. Una muy util es la de representar el juego de los
+bebes donde se apilan platos en una especia de torre de Hanoi.
+
+Importante: Tampoco se puede usar handleo de excepciones para ocultar lo que
+seria en definitiva un if
