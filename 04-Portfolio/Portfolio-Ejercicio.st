@@ -432,14 +432,15 @@ transactions
 		inject: OrderedCollection new
 		into: [ :allTransactions :account | allTransactions addAllLast: account transactions. allTransactions. ].! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'np 5/7/2018 22:04:43'!
-transactionsOf: anAccount 
+!Portfolio methodsFor: 'transactions' stamp: 'DR 5/8/2018 17:07:12'!
+transactionsOf: anAccount
+
 	(self manages: anAccount)
 		ifTrue: [^anAccount transactions.]
 		ifFalse: [self error: self class accountNotManagedMessageDescription]! !
 
 
-!Portfolio methodsFor: 'initialization' stamp: 'np 5/7/2018 21:41:22'!
+!Portfolio methodsFor: 'initialization' stamp: 'DR 5/8/2018 17:02:00'!
 initializeWith: aReceptiveAccount with: aReceptiveAccount2
 
 	accounts := OrderedCollection new.
@@ -452,9 +453,14 @@ initializeWith: aReceptiveAccount with: aReceptiveAccount2
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'np 5/7/2018 20:59:01'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'DR 5/8/2018 17:06:30'!
 with: anAccount1 with: anAccount2
+
 	| unPortfolio |
+	
+	(anAccount1 manages: anAccount2)
+		ifTrue: [ self error: self accountAlreadyManagedErrorMessage ].
+	
 	unPortfolio _ self new.
 	unPortfolio initializeWith: anAccount1 with: anAccount2.
 	^unPortfolio.! !
@@ -464,6 +470,10 @@ withAll: aCollectionOfAccounts
 
 	self shouldBeImplemented ! !
 
+
+!Portfolio class methodsFor: 'as yet unclassified' stamp: 'DR 5/8/2018 17:05:12'!
+accountAlreadyManagedErrorMessage
+	^ 'Ya la conozco a esta cuenta'.! !
 
 !Portfolio class methodsFor: 'as yet unclassified' stamp: 'np 5/7/2018 22:04:35'!
 accountNotManagedMessageDescription
