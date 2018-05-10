@@ -403,34 +403,46 @@ balance
 
 !classDefinition: #Portfolio category: #'Portfolio-Ejercicio'!
 SummarizingAccount subclass: #Portfolio
-	instanceVariableNames: 'accounts'
+	instanceVariableNames: 'managedAccounts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!Portfolio methodsFor: 'balance' stamp: 'np 5/7/2018 21:40:10'!
+!Portfolio methodsFor: 'balance' stamp: 'DR 5/10/2018 00:37:43'!
 balance
 
-	^ accounts inject: 0 into: [ :balanceSum :account | balanceSum + account balance]! !
+	^ managedAccounts
+		inject: 0
+		into: [ :balanceSum :managedAccount |
+			balanceSum + managedAccount balance]! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'np 5/7/2018 21:46:52'!
+!Portfolio methodsFor: 'testing' stamp: 'DR 5/10/2018 00:42:56'!
 manages: anAccount
 
-	^ (self = anAccount) or: (accounts inject: false into: [ :answer :account | answer or: (account manages: anAccount) ]).! !
+	^ (self = anAccount) or:
+	(managedAccounts
+		inject: false
+		into: [ :isManaged :managedAccount |
+			isManaged or: (managedAccount manages: anAccount) ])! !
 
-!Portfolio methodsFor: 'testing' stamp: 'np 5/7/2018 21:47:54'!
+!Portfolio methodsFor: 'testing' stamp: 'DR 5/10/2018 00:41:43'!
 registers: aTransaction
 
-	^ accounts inject: false into: [ :answer :account | answer or: (account registers: aTransaction) ].! !
+	^ managedAccounts
+		inject: false
+		into: [ :isRegistered :managedAccount |
+			isRegistered or: (managedAccount registers: aTransaction) ].! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'np 5/7/2018 22:06:46'!
+!Portfolio methodsFor: 'transactions' stamp: 'DR 5/10/2018 00:44:56'!
 transactions
 
-	^ accounts
+	^ managedAccounts
 		inject: OrderedCollection new
-		into: [ :allTransactions :account | allTransactions addAllLast: account transactions. allTransactions. ].! !
+		into: [ :allTransactions :managedAccount |
+			allTransactions addAllLast: managedAccount transactions.
+			allTransactions. ].! !
 
 !Portfolio methodsFor: 'transactions' stamp: 'DR 5/8/2018 17:07:12'!
 transactionsOf: anAccount
@@ -440,12 +452,12 @@ transactionsOf: anAccount
 		ifFalse: [self error: self class accountNotManagedMessageDescription]! !
 
 
-!Portfolio methodsFor: 'initialization' stamp: 'DR 5/8/2018 17:02:00'!
-initializeWith: aReceptiveAccount with: aReceptiveAccount2
+!Portfolio methodsFor: 'initialization' stamp: 'DR 5/10/2018 00:49:38'!
+initializeWith: anAccount with: anotherAccount
 
-	accounts := OrderedCollection new.
-	accounts add: aReceptiveAccount.
-	accounts add: aReceptiveAccount2.! !
+	managedAccounts := OrderedCollection new.
+	managedAccounts add: anAccount.
+	managedAccounts add: anotherAccount.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -453,31 +465,31 @@ initializeWith: aReceptiveAccount with: aReceptiveAccount2
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'DR 5/8/2018 17:06:30'!
-with: anAccount1 with: anAccount2
+!Portfolio class methodsFor: 'instance creation' stamp: 'DR 5/10/2018 00:53:10'!
+with: anAccount with: anotherAccount
 
-	| unPortfolio |
+	| aNewPortfolio |
 	
-	(anAccount1 manages: anAccount2)
+	"Teniendo en cuenta que no aparece en los tests, y por el mail de Hernan, no 
+	consideramos la posibilidad de que ambas cuentas sean portfolios"
+	
+	((anAccount manages: anotherAccount) or: (anotherAccount manages: anAccount))
 		ifTrue: [ self error: self accountAlreadyManagedErrorMessage ].
 	
-	unPortfolio _ self new.
-	unPortfolio initializeWith: anAccount1 with: anAccount2.
-	^unPortfolio.! !
-
-!Portfolio class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:41'!
-withAll: aCollectionOfAccounts
-
-	self shouldBeImplemented ! !
+	aNewPortfolio _ self new.
+	aNewPortfolio initializeWith: anAccount with: anotherAccount.
+	^aNewPortfolio.! !
 
 
-!Portfolio class methodsFor: 'as yet unclassified' stamp: 'DR 5/8/2018 17:05:12'!
+!Portfolio class methodsFor: 'error messages' stamp: 'DR 5/10/2018 00:29:53'!
 accountAlreadyManagedErrorMessage
+
 	^ 'Ya la conozco a esta cuenta'.! !
 
-!Portfolio class methodsFor: 'as yet unclassified' stamp: 'np 5/7/2018 22:04:35'!
+!Portfolio class methodsFor: 'error messages' stamp: 'DR 5/10/2018 00:29:50'!
 accountNotManagedMessageDescription
-	^ 'yo no manejo esta cuenta papi'.! !
+
+	^ 'Yo no manejo esta cuenta'.! !
 
 
 !classDefinition: #ReceptiveAccount category: #'Portfolio-Ejercicio'!
