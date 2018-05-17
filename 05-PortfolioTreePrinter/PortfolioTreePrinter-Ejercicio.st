@@ -551,8 +551,19 @@ Object subclass: #AccountTransaction
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!AccountTransaction methodsFor: 'evaluating' stamp: 'HernanWilkinson 7/14/2011 06:48'!
+!AccountTransaction methodsFor: 'value' stamp: 'HernanWilkinson 7/14/2011 06:48'!
 value
+
+	self subclassResponsibility ! !
+
+
+!AccountTransaction methodsFor: 'consulting' stamp: 'np 5/17/2018 00:31:38'!
+affectBalance: aBalance
+
+	self subclassResponsibility ! !
+
+!AccountTransaction methodsFor: 'consulting' stamp: 'np 5/17/2018 00:31:55'!
+answerQuery: aQuery
 
 	self subclassResponsibility ! !
 
@@ -580,36 +591,38 @@ AccountTransaction subclass: #CertificateOfDeposit
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 19:40:40'!
-affectBalance: balance
-	^balance - value! !
-
-!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:25:20'!
-answerQuery: aQuery
-
-	^aQuery queryCertificateOfDeposit: self! !
-
-!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 21:36:51'!
+!CertificateOfDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 21:36:51'!
 initializeWith: anAmmountOfMoney during: aNumberOfDays at: aTna
 
 	value := anAmmountOfMoney.
 	numberOfDays := aNumberOfDays.
 	tna := aTna.! !
 
-!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 19:11:02'!
+
+!CertificateOfDeposit methodsFor: 'parameters' stamp: 'DR 5/14/2018 19:11:02'!
 numberOfDays
 	
 	^numberOfDays! !
 
-!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 19:10:53'!
+!CertificateOfDeposit methodsFor: 'parameters' stamp: 'DR 5/14/2018 19:10:53'!
 tna
 	
 	^tna! !
 
-!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 18:45:50'!
+!CertificateOfDeposit methodsFor: 'parameters' stamp: 'DR 5/14/2018 18:45:50'!
 value
 	
 	^value! !
+
+
+!CertificateOfDeposit methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:40:40'!
+affectBalance: balance
+	^balance - value! !
+
+!CertificateOfDeposit methodsFor: 'consulting' stamp: 'np 5/16/2018 21:25:20'!
+answerQuery: aQuery
+
+	^aQuery queryCertificateOfDeposit: self! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -640,31 +653,27 @@ AccountTransaction subclass: #Deposit
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!Deposit methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:40:53'!
-affectBalance: balance
-	
-	^balance + value! !
+!Deposit methodsFor: 'initialization' stamp: 'np 5/17/2018 00:39:59'!
+initializeFor: aValueToDeposit
 
-!Deposit methodsFor: 'initialization' stamp: 'np 5/16/2018 21:12:05'!
-answerQuery: aQuery
-
-	^aQuery queryDeposit: self! !
-
-!Deposit methodsFor: 'initialization' stamp: 'np 5/15/2018 16:22:20'!
-executeSummarizingAccountQuery: aPortfolioQuery
-
-	^aPortfolioQuery executeForDeposit: self! !
-
-!Deposit methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:45'!
-initializeFor: aValue
-
-	value := aValue ! !
+	value := aValueToDeposit ! !
 
 
 !Deposit methodsFor: 'value' stamp: 'HernanWilkinson 7/13/2011 18:38'!
 value
 
 	^ value! !
+
+
+!Deposit methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:40:53'!
+affectBalance: balance
+	
+	^balance + value! !
+
+!Deposit methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:05'!
+answerQuery: aQuery
+
+	^aQuery queryDeposit: self! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -707,12 +716,12 @@ value
 	^ value ! !
 
 
-!Withdraw methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 19:42:07'!
+!Withdraw methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:42:07'!
 affectBalance: balance
 
 	^balance - value! !
 
-!Withdraw methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:12:20'!
+!Withdraw methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:20'!
 answerQuery: aQuery
 
 	^aQuery queryWithdraw: self! !
@@ -757,12 +766,12 @@ registers: aTransaction
 	self subclassResponsibility ! !
 
 
-!SummarizingAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:34'!
+!SummarizingAccount methodsFor: 'consulting' stamp: 'HernanWilkinson 7/13/2011 18:34'!
 balance
 
 	self subclassResponsibility ! !
 
-!SummarizingAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:35'!
+!SummarizingAccount methodsFor: 'consulting' stamp: 'HernanWilkinson 7/13/2011 18:35'!
 transactions
 
 	self subclassResponsibility ! !
@@ -791,36 +800,30 @@ registers: aTransaction
 	^ accounts anySatisfy: [ :anAccount | anAccount registers: aTransaction ]  ! !
 
 
-!Portfolio methodsFor: 'initialization' stamp: 'np 5/16/2018 21:27:09'!
-answerQuery: aQuery
-
-	^aQuery queryPortfolio: self! !
-
-!Portfolio methodsFor: 'initialization' stamp: 'DR 5/10/2018 00:49:38'!
-initializeWith: anAccount with: anotherAccount
-
-	managedAccounts := OrderedCollection new.
-	managedAccounts add: anAccount.
-	managedAccounts add: anotherAccount.! !
-
 !Portfolio methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 19:19'!
 initializeWithAll: aCollectionOfAccounts
 
 	accounts := aCollectionOfAccounts   ! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'HAW 8/13/2017 17:47:44'!
+!Portfolio methodsFor: 'consulting' stamp: 'np 5/16/2018 21:27:09'!
+answerQuery: aQuery
+
+	^aQuery queryPortfolio: self! !
+
+!Portfolio methodsFor: 'consulting' stamp: 'HAW 8/13/2017 17:47:44'!
 balance
 
 	^ accounts sum: [ :account | account balance ]
 ! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'DR 5/14/2018 20:18:59'!
-managedAccounts
+!Portfolio methodsFor: 'consulting' stamp: 'np 5/17/2018 00:34:12'!
+managedAccountsDo: aMonoArgumentedClosure
 
-	^accounts ! !
+	^accounts copy do: aMonoArgumentedClosure
+	! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'HAW 9/25/2017 19:40:20'!
+!Portfolio methodsFor: 'consulting' stamp: 'HAW 9/25/2017 19:40:20'!
 transactions 
 
 	^ accounts 
@@ -828,7 +831,7 @@ transactions
 		into: [ :transactions :account | transactions addAll: account transactions. transactions ]
 	! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'np 5/16/2018 21:50:17'!
+!Portfolio methodsFor: 'consulting' stamp: 'np 5/16/2018 21:50:17'!
 transactionsDo: aMonoArgumentedClosure
 
 	| allTransactions |
@@ -840,7 +843,7 @@ transactionsDo: aMonoArgumentedClosure
 	allTransactions do: aMonoArgumentedClosure
 	! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 19:27'!
+!Portfolio methodsFor: 'consulting' stamp: 'HernanWilkinson 7/13/2011 19:27'!
 transactionsOf: anAccount 
 
 	^ (self manages: anAccount)
@@ -910,54 +913,11 @@ SummarizingAccount subclass: #ReceptiveAccount
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!ReceptiveAccount methodsFor: 'initialization' stamp: 'np 5/16/2018 21:26:56'!
-answerQuery: aQuery
-
-	^aQuery queryReceptiveAccount: self! !
-
 !ReceptiveAccount methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 18:35'!
 initialize
 
 	super initialize.
 	transactions := OrderedCollection new.! !
-
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'DR 5/10/2018 20:44:20'!
-balance
-
-	^ transactions
-		inject: 0
-		into: [ :balance :transaction | transaction affectBalance: balance ]! !
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'DR 5/10/2018 21:38:22'!
-investmentNet
-
-	^ transactions
-		inject: 0
-		into: [ :balance :transaction | transaction affectInvestmentNet: balance ]! !
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
-register: aTransaction
-
-	transactions add: aTransaction 
-! !
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
-transactions 
-
-	^ transactions copy! !
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'np 5/16/2018 21:46:45'!
-transactionsDo: aMonoArgumentedClosure
-
-	^ transactions do: aMonoArgumentedClosure! !
-
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'DR 5/10/2018 21:55:46'!
-transferNet
-
-	^ transactions
-		inject: 0
-		into: [ :balance :transaction | transaction affectTransferNet: balance ]! !
 
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
@@ -973,17 +933,34 @@ registers: aTtransaction
 ! !
 
 
-!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 21:20:10'!
-accountSummaryLines
-	^ transactions
-		inject: OrderedCollection new 
-		into: [ :summary :transaction | summary add: transaction asString. summary. ]! !
+!ReceptiveAccount methodsFor: 'registration' stamp: 'HernanWilkinson 7/13/2011 18:37'!
+register: aTransaction
 
-!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 21:47:08'!
-investmentEarnings
+	transactions add: aTransaction 
+! !
+
+
+!ReceptiveAccount methodsFor: 'consulting' stamp: 'np 5/16/2018 21:26:56'!
+answerQuery: aQuery
+
+	^aQuery queryReceptiveAccount: self! !
+
+!ReceptiveAccount methodsFor: 'consulting' stamp: 'DR 5/10/2018 20:44:20'!
+balance
+
 	^ transactions
 		inject: 0
-		into: [ :balance :transaction | transaction affectInvestmentEarnings: balance ]! !
+		into: [ :balance :transaction | transaction affectBalance: balance ]! !
+
+!ReceptiveAccount methodsFor: 'consulting' stamp: 'HernanWilkinson 7/13/2011 18:37'!
+transactions 
+
+	^ transactions copy! !
+
+!ReceptiveAccount methodsFor: 'consulting' stamp: 'np 5/17/2018 00:33:36'!
+transactionsDo: aMonoArgumentedClosure
+
+	^ transactions copy do: aMonoArgumentedClosure! !
 
 
 !classDefinition: #SummarizingAccountQuery category: #'PortfolioTreePrinter-Ejercicio'!
@@ -992,6 +969,11 @@ Object subclass: #SummarizingAccountQuery
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!SummarizingAccountQuery methodsFor: 'value' stamp: 'np 5/17/2018 00:17:30'!
+value
+
+	self subclassResponsibility ! !
 
 
 !classDefinition: #AccountInvestmentEarnings category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1007,32 +989,7 @@ initializeWith: anAccount
 	account _ anAccount! !
 
 
-!AccountInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:18:14'!
-queryCertificateOfDeposit: aCertificateOfDeposit
-
-	^(aCertificateOfDeposit value*(aCertificateOfDeposit tna/360)*(aCertificateOfDeposit numberOfDays))! !
-
-!AccountInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:17:22'!
-queryDeposit: aDeposit
-
-	^0! !
-
-!AccountInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:17:41'!
-queryTransferDeposit: aTransferDeposit
-
-	^0! !
-
-!AccountInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:17:51'!
-queryTransferWithdraw: aTransferWithdraw
-
-	^0! !
-
-!AccountInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:18:00'!
-queryWithdraw: aWithDraw
-
-	^0! !
-
-!AccountInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:54:25'!
+!AccountInvestmentEarnings methodsFor: 'value' stamp: 'np 5/16/2018 21:54:25'!
 value
 
 	| investmentEarnings |
@@ -1042,6 +999,32 @@ value
 	
 	^investmentEarnings
 			! !
+
+
+!AccountInvestmentEarnings methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:18:14'!
+queryCertificateOfDeposit: aCertificateOfDeposit
+
+	^(aCertificateOfDeposit value*(aCertificateOfDeposit tna/360)*(aCertificateOfDeposit numberOfDays))! !
+
+!AccountInvestmentEarnings methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:17:22'!
+queryDeposit: aDeposit
+
+	^0! !
+
+!AccountInvestmentEarnings methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:17:41'!
+queryTransferDeposit: aTransferDeposit
+
+	^0! !
+
+!AccountInvestmentEarnings methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:17:51'!
+queryTransferWithdraw: aTransferWithdraw
+
+	^0! !
+
+!AccountInvestmentEarnings methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:18:00'!
+queryWithdraw: aWithDraw
+
+	^0! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1068,32 +1051,7 @@ initializeWith: anAccount
 	account _ anAccount! !
 
 
-!AccountInvestmentNetOf methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:16:19'!
-queryCertificateOfDeposit: aCertificateOfDeposit
-
-	^aCertificateOfDeposit value! !
-
-!AccountInvestmentNetOf methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:13:57'!
-queryDeposit: aDeposit
-
-	^0! !
-
-!AccountInvestmentNetOf methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:15:59'!
-queryTransferDeposit: aTransferWithdraw
-
-	^0! !
-
-!AccountInvestmentNetOf methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:15:46'!
-queryTransferWithdraw: aTransferWithdraw
-
-	^0! !
-
-!AccountInvestmentNetOf methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:14:56'!
-queryWithdraw: aWithdraw
-
-	^0! !
-
-!AccountInvestmentNetOf methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:54:59'!
+!AccountInvestmentNetOf methodsFor: 'value' stamp: 'np 5/16/2018 21:54:59'!
 value
 
 	| investmentNet |
@@ -1103,6 +1061,32 @@ value
 	
 	^investmentNet
 			! !
+
+
+!AccountInvestmentNetOf methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:16:19'!
+queryCertificateOfDeposit: aCertificateOfDeposit
+
+	^aCertificateOfDeposit value! !
+
+!AccountInvestmentNetOf methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:13:57'!
+queryDeposit: aDeposit
+
+	^0! !
+
+!AccountInvestmentNetOf methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:15:59'!
+queryTransferDeposit: aTransferWithdraw
+
+	^0! !
+
+!AccountInvestmentNetOf methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:15:46'!
+queryTransferWithdraw: aTransferWithdraw
+
+	^0! !
+
+!AccountInvestmentNetOf methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:14:56'!
+queryWithdraw: aWithdraw
+
+	^0! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1129,37 +1113,7 @@ initializeWith: anAccount
 	account _ anAccount! !
 
 
-!AccountSummaryLines methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:18:40'!
-queryCertificateOfDeposit: aCertificateOfDeposit
-
-	^('Plazo fijo por ', aCertificateOfDeposit value asString, ' durante ', aCertificateOfDeposit numberOfDays asString, ' dias a una tna de ', (aCertificateOfDeposit tna * 100) asString, '%').
-! !
-
-!AccountSummaryLines methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:19:09'!
-queryDeposit: aDeposit
-
-	^('Deposito por ', (aDeposit value asString)).
-! !
-
-!AccountSummaryLines methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:19:20'!
-queryTransferDeposit: aTransferDeposit
-
-	^('Transferencia por ', (aTransferDeposit value asString)).
-! !
-
-!AccountSummaryLines methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:19:29'!
-queryTransferWithdraw: aTransferWithdraw
-
-	^ ('Transferencia por -', (aTransferWithdraw value asString)).
-! !
-
-!AccountSummaryLines methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:19:45'!
-queryWithdraw: aWithdraw
-
-	^('Extraccion por ', (aWithdraw value asString)).
-! !
-
-!AccountSummaryLines methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:55:59'!
+!AccountSummaryLines methodsFor: 'value' stamp: 'np 5/16/2018 21:55:59'!
 value
 
 	| summaryLines |
@@ -1169,6 +1123,37 @@ value
 	
 	^summaryLines
 			! !
+
+
+!AccountSummaryLines methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:18:40'!
+queryCertificateOfDeposit: aCertificateOfDeposit
+
+	^('Plazo fijo por ', aCertificateOfDeposit value asString, ' durante ', aCertificateOfDeposit numberOfDays asString, ' dias a una tna de ', (aCertificateOfDeposit tna * 100) asString, '%').
+! !
+
+!AccountSummaryLines methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:19:09'!
+queryDeposit: aDeposit
+
+	^('Deposito por ', (aDeposit value asString)).
+! !
+
+!AccountSummaryLines methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:19:20'!
+queryTransferDeposit: aTransferDeposit
+
+	^('Transferencia por ', (aTransferDeposit value asString)).
+! !
+
+!AccountSummaryLines methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:19:29'!
+queryTransferWithdraw: aTransferWithdraw
+
+	^ ('Transferencia por -', (aTransferWithdraw value asString)).
+! !
+
+!AccountSummaryLines methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:19:45'!
+queryWithdraw: aWithdraw
+
+	^('Extraccion por ', (aWithdraw value asString)).
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1195,32 +1180,7 @@ initializeWith: anAccount
 	account _ anAccount! !
 
 
-!AccountTransferNet methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:20:03'!
-queryCertificateOfDeposit: aCertificateOfDeposit
-
-	^0! !
-
-!AccountTransferNet methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:20:09'!
-queryDeposit: aDeposit
-
-	^0! !
-
-!AccountTransferNet methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:20:18'!
-queryTransferDeposit: aTransferDeposit
-
-	^aTransferDeposit value! !
-
-!AccountTransferNet methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:20:36'!
-queryTransferWithdraw: aTransferWithdraw
-
-	^-1 * aTransferWithdraw value! !
-
-!AccountTransferNet methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:20:46'!
-queryWithdraw: aWithDraw
-
-	^0! !
-
-!AccountTransferNet methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:57:05'!
+!AccountTransferNet methodsFor: 'value' stamp: 'np 5/16/2018 21:57:05'!
 value
 		
 	| transferNet |
@@ -1230,6 +1190,32 @@ value
 	
 	^transferNet
 			! !
+
+
+!AccountTransferNet methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:20:03'!
+queryCertificateOfDeposit: aCertificateOfDeposit
+
+	^0! !
+
+!AccountTransferNet methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:20:09'!
+queryDeposit: aDeposit
+
+	^0! !
+
+!AccountTransferNet methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:20:18'!
+queryTransferDeposit: aTransferDeposit
+
+	^aTransferDeposit value! !
+
+!AccountTransferNet methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:20:36'!
+queryTransferWithdraw: aTransferWithdraw
+
+	^-1 * aTransferWithdraw value! !
+
+!AccountTransferNet methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:20:46'!
+queryWithdraw: aWithDraw
+
+	^0! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1256,33 +1242,33 @@ initializeFor: anAccount withAccountNames: aDictionaryFromAccountToName
 	account _ anAccount.
 	accountsNamesDictionary _ aDictionaryFromAccountToName .! !
 
-!PortfolioTree methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:54:03'!
-initializeWith: anAccount
 
-	account _ anAccount! !
-
-
-!PortfolioTree methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 22:05:43'!
+!PortfolioTree methodsFor: 'selective queries' stamp: 'np 5/17/2018 00:39:17'!
 queryPortfolio: aPortfolio
 
-	^(aPortfolio managedAccounts
-		inject: OrderedCollection new
-		into: [ :lines :managedAccount |
-			lines, ((PortfolioTree of: managedAccount withSummarizingAccountNames: accountsNamesDictionary) value)
-	])
-	collect: [ :aString | ' ', aString]
+	| linesOfAccounts |
+	
+	linesOfAccounts  _ OrderedCollection new.
+	aPortfolio managedAccountsDo: [ :managedAccount |
+			linesOfAccounts _ (linesOfAccounts, ((PortfolioTree of: managedAccount withSummarizingAccountNames: accountsNamesDictionary) value))
+	].
+
+	^linesOfAccounts collect: [ :aString | ' ', aString]
+
+	
 	
 	
 	
 
 ! !
 
-!PortfolioTree methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:27:53'!
+!PortfolioTree methodsFor: 'selective queries' stamp: 'np 5/16/2018 21:27:53'!
 queryReceptiveAccount: aReceptiveAccount
 
 	^OrderedCollection new! !
 
-!PortfolioTree methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:11:18'!
+
+!PortfolioTree methodsFor: 'value' stamp: 'np 5/16/2018 21:11:18'!
 value
 
 	| firstLine |
@@ -1312,12 +1298,13 @@ Object subclass: #Transfer
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!Transfer methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 19:42:12'!
+!Transfer methodsFor: 'initialization' stamp: 'DR 5/10/2018 19:42:12'!
 initializeFor: aValue
 
 	value := aValue ! !
 
-!Transfer methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:43:32'!
+
+!Transfer methodsFor: 'value' stamp: 'DR 5/10/2018 20:43:32'!
 value
 	^value! !
 
@@ -1365,16 +1352,17 @@ value
 	^transfer value! !
 
 
-!TransferDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 19:41:39'!
+!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:23'!
 affectBalance: balance
+
 	^balance + self value! !
 
-!TransferDeposit methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:12:41'!
+!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:41'!
 answerQuery: aQuery
 
 	^aQuery queryTransferDeposit: self! !
 
-!TransferDeposit methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:46:22'!
+!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:17'!
 transfer
 
 	^transfer! !
@@ -1408,17 +1396,17 @@ value
 	^transfer value! !
 
 
-!TransferWithdraw methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 19:41:57'!
+!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:41:57'!
 affectBalance: balance
 
 	^balance - self value! !
 
-!TransferWithdraw methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:12:58'!
+!TransferWithdraw methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:58'!
 answerQuery: aQuery
 
 	^aQuery queryTransferWithdraw: self! !
 
-!TransferWithdraw methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:46:28'!
+!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/10/2018 20:46:28'!
 transfer
 
 	^transfer! !
