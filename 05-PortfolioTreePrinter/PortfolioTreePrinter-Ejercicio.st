@@ -557,7 +557,6 @@ value
 	self subclassResponsibility ! !
 
 
-
 !AccountTransaction methodsFor: 'consulting' stamp: 'np 5/17/2018 00:31:38'!
 affectBalance: aBalance
 
@@ -591,7 +590,6 @@ AccountTransaction subclass: #CertificateOfDeposit
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
 
 !CertificateOfDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 21:36:51'!
 initializeWith: anAmmountOfMoney during: aNumberOfDays at: aTna
@@ -701,35 +699,35 @@ register: aValue on: account
 
 !classDefinition: #TransferLeg category: #'PortfolioTreePrinter-Ejercicio'!
 AccountTransaction subclass: #TransferLeg
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!TransferLeg methodsFor: 'consulting' stamp: 'np 5/17/2018 00:45:57'!
-transfer
-
-	self subclassResponsibility ! !
-
-
-!classDefinition: #TransferDeposit category: #'PortfolioTreePrinter-Ejercicio'!
-TransferLeg subclass: #TransferDeposit
 	instanceVariableNames: 'transfer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-
-!TransferDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:21'!
+!TransferLeg methodsFor: 'initialization' stamp: 'DR 5/17/2018 14:09:03'!
 initializeWith: aTransfer
+
 	transfer := aTransfer! !
 
 
-!TransferDeposit methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:18'!
+!TransferLeg methodsFor: 'value' stamp: 'DR 5/17/2018 14:08:28'!
 value
 
 	^transfer value! !
 
+
+!TransferLeg methodsFor: 'consulting' stamp: 'DR 5/17/2018 14:08:23'!
+transfer
+
+	^transfer! !
+
+
+!classDefinition: #TransferDeposit category: #'PortfolioTreePrinter-Ejercicio'!
+TransferLeg subclass: #TransferDeposit
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
 
 !TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:23'!
 affectBalance: balance
@@ -740,11 +738,6 @@ affectBalance: balance
 answerQuery: aQuery
 
 	^aQuery queryTransferDeposit: self! !
-
-!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:17'!
-transfer
-
-	^transfer! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -759,22 +752,10 @@ for: aTransfer
 
 !classDefinition: #TransferWithdraw category: #'PortfolioTreePrinter-Ejercicio'!
 TransferLeg subclass: #TransferWithdraw
-	instanceVariableNames: 'transfer'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
-
-!TransferWithdraw methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:30'!
-initializeWith: aTransfer
-	transfer := aTransfer! !
-
-
-!TransferWithdraw methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:25'!
-value
-
-	^transfer value! !
-
 
 !TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:41:57'!
 affectBalance: balance
@@ -785,11 +766,6 @@ affectBalance: balance
 answerQuery: aQuery
 
 	^aQuery queryTransferWithdraw: self! !
-
-!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/10/2018 20:46:28'!
-transfer
-
-	^transfer! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -871,8 +847,6 @@ registers: aTransaction
 	self subclassResponsibility ! !
 
 
-
-
 !SummarizingAccount methodsFor: 'consulting' stamp: 'HernanWilkinson 7/13/2011 18:34'!
 balance
 
@@ -890,7 +864,6 @@ SummarizingAccount subclass: #Portfolio
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
 
 !Portfolio methodsFor: 'testing' stamp: 'HAW 5/8/2018 16:46:26'!
 anyManagedAccountManages: anAccount 
@@ -1041,8 +1014,6 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
-
-
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 manages: anAccount
 
@@ -1054,7 +1025,6 @@ registers: aTtransaction
 
 	^ transactions includes: aTtransaction 
 ! !
-
 
 
 !ReceptiveAccount methodsFor: 'registration' stamp: 'HernanWilkinson 7/13/2011 18:37'!
@@ -1106,7 +1076,6 @@ SummarizingAccountQuery subclass: #AccountInvestmentEarnings
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
 
 !AccountInvestmentEarnings methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:26:07'!
 initializeWith: anAccount
@@ -1170,7 +1139,6 @@ SummarizingAccountQuery subclass: #AccountInvestmentNetOf
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-
 !AccountInvestmentNetOf methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:13:44'!
 initializeWith: anAccount
 
@@ -1232,7 +1200,6 @@ SummarizingAccountQuery subclass: #AccountSummaryLines
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
 
 !AccountSummaryLines methodsFor: 'initialization' stamp: 'DR 5/14/2018 18:57:34'!
 initializeWith: anAccount
@@ -1300,7 +1267,6 @@ SummarizingAccountQuery subclass: #AccountTransferNet
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
 
 !AccountTransferNet methodsFor: 'initialization' stamp: 'DR 5/14/2018 18:49:18'!
 initializeWith: anAccount
