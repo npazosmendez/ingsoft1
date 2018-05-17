@@ -697,6 +697,107 @@ register: aValue on: account
 	^ withdraw! !
 
 
+!classDefinition: #TransferLeg category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #TransferLeg
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!TransferLeg methodsFor: 'consulting' stamp: 'np 5/17/2018 00:45:57'!
+transfer
+
+	self subclassResponsibility ! !
+
+
+!classDefinition: #TransferDeposit category: #'PortfolioTreePrinter-Ejercicio'!
+TransferLeg subclass: #TransferDeposit
+	instanceVariableNames: 'transfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!TransferDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:21'!
+initializeWith: aTransfer
+	transfer := aTransfer! !
+
+
+!TransferDeposit methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:18'!
+value
+
+	^transfer value! !
+
+
+!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:23'!
+affectBalance: balance
+
+	^balance + self value! !
+
+!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:41'!
+answerQuery: aQuery
+
+	^aQuery queryTransferDeposit: self! !
+
+!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:17'!
+transfer
+
+	^transfer! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TransferDeposit class' category: #'PortfolioTreePrinter-Ejercicio'!
+TransferDeposit class
+	instanceVariableNames: ''!
+
+!TransferDeposit class methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:40:14'!
+for: aTransfer
+	^self new initializeWith: aTransfer! !
+
+
+!classDefinition: #TransferWithdraw category: #'PortfolioTreePrinter-Ejercicio'!
+TransferLeg subclass: #TransferWithdraw
+	instanceVariableNames: 'transfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!TransferWithdraw methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:30'!
+initializeWith: aTransfer
+	transfer := aTransfer! !
+
+
+!TransferWithdraw methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:25'!
+value
+
+	^transfer value! !
+
+
+!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:41:57'!
+affectBalance: balance
+
+	^balance - self value! !
+
+!TransferWithdraw methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:58'!
+answerQuery: aQuery
+
+	^aQuery queryTransferWithdraw: self! !
+
+!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/10/2018 20:46:28'!
+transfer
+
+	^transfer! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TransferWithdraw class' category: #'PortfolioTreePrinter-Ejercicio'!
+TransferWithdraw class
+	instanceVariableNames: ''!
+
+!TransferWithdraw class methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:40:33'!
+for: aTransfer
+	^self new initializeWith: aTransfer! !
+
+
 !classDefinition: #Withdraw category: #'PortfolioTreePrinter-Ejercicio'!
 AccountTransaction subclass: #Withdraw
 	instanceVariableNames: 'value'
@@ -1332,91 +1433,3 @@ register: anAmmountOfMoney from: aSourceAccount to: aDestinationAccount
 	aDestinationAccount register: transferDeposit.
 	
 	^transfer ! !
-
-
-!classDefinition: #TransferDeposit category: #'PortfolioTreePrinter-Ejercicio'!
-Object subclass: #TransferDeposit
-	instanceVariableNames: 'transfer'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!TransferDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:21'!
-initializeWith: aTransfer
-	transfer := aTransfer! !
-
-
-!TransferDeposit methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:18'!
-value
-
-	^transfer value! !
-
-
-!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:23'!
-affectBalance: balance
-
-	^balance + self value! !
-
-!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:41'!
-answerQuery: aQuery
-
-	^aQuery queryTransferDeposit: self! !
-
-!TransferDeposit methodsFor: 'consulting' stamp: 'np 5/17/2018 00:29:17'!
-transfer
-
-	^transfer! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TransferDeposit class' category: #'PortfolioTreePrinter-Ejercicio'!
-TransferDeposit class
-	instanceVariableNames: ''!
-
-!TransferDeposit class methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:40:14'!
-for: aTransfer
-	^self new initializeWith: aTransfer! !
-
-
-!classDefinition: #TransferWithdraw category: #'PortfolioTreePrinter-Ejercicio'!
-Object subclass: #TransferWithdraw
-	instanceVariableNames: 'transfer'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!TransferWithdraw methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:30'!
-initializeWith: aTransfer
-	transfer := aTransfer! !
-
-
-!TransferWithdraw methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:25'!
-value
-
-	^transfer value! !
-
-
-!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/14/2018 19:41:57'!
-affectBalance: balance
-
-	^balance - self value! !
-
-!TransferWithdraw methodsFor: 'consulting' stamp: 'np 5/16/2018 21:12:58'!
-answerQuery: aQuery
-
-	^aQuery queryTransferWithdraw: self! !
-
-!TransferWithdraw methodsFor: 'consulting' stamp: 'DR 5/10/2018 20:46:28'!
-transfer
-
-	^transfer! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TransferWithdraw class' category: #'PortfolioTreePrinter-Ejercicio'!
-TransferWithdraw class
-	instanceVariableNames: ''!
-
-!TransferWithdraw class methodsFor: 'as yet unclassified' stamp: 'DR 5/10/2018 20:40:33'!
-for: aTransfer
-	^self new initializeWith: aTransfer! !
