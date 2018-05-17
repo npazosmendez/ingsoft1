@@ -557,6 +557,7 @@ value
 	self subclassResponsibility ! !
 
 
+
 !AccountTransaction methodsFor: 'consulting' stamp: 'np 5/17/2018 00:31:38'!
 affectBalance: aBalance
 
@@ -590,6 +591,7 @@ AccountTransaction subclass: #CertificateOfDeposit
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
 
 !CertificateOfDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 21:36:51'!
 initializeWith: anAmmountOfMoney during: aNumberOfDays at: aTna
@@ -717,6 +719,7 @@ TransferLeg subclass: #TransferDeposit
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+
 !TransferDeposit methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:21'!
 initializeWith: aTransfer
 	transfer := aTransfer! !
@@ -760,6 +763,7 @@ TransferLeg subclass: #TransferWithdraw
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
 
 !TransferWithdraw methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:30'!
 initializeWith: aTransfer
@@ -867,6 +871,8 @@ registers: aTransaction
 	self subclassResponsibility ! !
 
 
+
+
 !SummarizingAccount methodsFor: 'consulting' stamp: 'HernanWilkinson 7/13/2011 18:34'!
 balance
 
@@ -885,6 +891,7 @@ SummarizingAccount subclass: #Portfolio
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+
 !Portfolio methodsFor: 'testing' stamp: 'HAW 5/8/2018 16:46:26'!
 anyManagedAccountManages: anAccount 
 
@@ -900,6 +907,19 @@ registers: aTransaction
 
 	^ accounts anySatisfy: [ :anAccount | anAccount registers: aTransaction ]  ! !
 
+
+!Portfolio methodsFor: 'transactions' stamp: 'DR 5/14/2018 20:18:59'!
+managedAccounts
+
+	^accounts ! !
+
+
+!Portfolio methodsFor: 'initialization' stamp: 'DR 5/10/2018 00:49:38'!
+initializeWith: anAccount with: anotherAccount
+
+	managedAccounts := OrderedCollection new.
+	managedAccounts add: anAccount.
+	managedAccounts add: anotherAccount.! !
 
 !Portfolio methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 19:19'!
 initializeWithAll: aCollectionOfAccounts
@@ -1021,6 +1041,8 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
+
+
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 manages: anAccount
 
@@ -1032,6 +1054,7 @@ registers: aTtransaction
 
 	^ transactions includes: aTtransaction 
 ! !
+
 
 
 !ReceptiveAccount methodsFor: 'registration' stamp: 'HernanWilkinson 7/13/2011 18:37'!
@@ -1083,6 +1106,7 @@ SummarizingAccountQuery subclass: #AccountInvestmentEarnings
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
 
 !AccountInvestmentEarnings methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:26:07'!
 initializeWith: anAccount
@@ -1146,6 +1170,7 @@ SummarizingAccountQuery subclass: #AccountInvestmentNetOf
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+
 !AccountInvestmentNetOf methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:13:44'!
 initializeWith: anAccount
 
@@ -1207,6 +1232,7 @@ SummarizingAccountQuery subclass: #AccountSummaryLines
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
 
 !AccountSummaryLines methodsFor: 'initialization' stamp: 'DR 5/14/2018 18:57:34'!
 initializeWith: anAccount
@@ -1275,6 +1301,7 @@ SummarizingAccountQuery subclass: #AccountTransferNet
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+
 !AccountTransferNet methodsFor: 'initialization' stamp: 'DR 5/14/2018 18:49:18'!
 initializeWith: anAccount
 
@@ -1337,11 +1364,23 @@ SummarizingAccountQuery subclass: #PortfolioTree
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+!PortfolioTree methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 20:13:04'!
+initializeFor: anAccount with: aDictionary
+
+	account _ anAccount.
+	accountsNamesDictionary _ aDictionary .! !
+
+
 !PortfolioTree methodsFor: 'initialization' stamp: 'np 5/16/2018 22:03:39'!
 initializeFor: anAccount withAccountNames: aDictionaryFromAccountToName
 
 	account _ anAccount.
 	accountsNamesDictionary _ aDictionaryFromAccountToName .! !
+
+!PortfolioTree methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:54:03'!
+initializeWith: anAccount
+
+	account _ anAccount! !
 
 
 !PortfolioTree methodsFor: 'selective queries' stamp: 'np 5/17/2018 00:39:17'!
@@ -1384,6 +1423,11 @@ value
 !classDefinition: 'PortfolioTree class' category: #'PortfolioTreePrinter-Ejercicio'!
 PortfolioTree class
 	instanceVariableNames: ''!
+
+!PortfolioTree class methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 20:13:40'!
+of: anAccount with: aDictionary
+
+	^self new initializeFor: anAccount with: aDictionary ! !
 
 !PortfolioTree class methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 22:04:42'!
 of: anAccount withSummarizingAccountNames: aDictionaryFromAccountToName
