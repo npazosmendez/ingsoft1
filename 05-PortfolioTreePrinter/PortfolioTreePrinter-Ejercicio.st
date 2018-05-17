@@ -533,10 +533,10 @@ investmentNetOf: aReceptiveAccount
 	
 	^(AccountInvestmentNetOf of: aReceptiveAccount ) value! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'DR 5/14/2018 21:05:54'!
+!PortfolioTest methodsFor: 'test support' stamp: 'np 5/16/2018 22:05:01'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
 	
-	^(PortfolioTree of: aPortfolio with: aDictionary) value! !
+	^(PortfolioTree of: aPortfolio withSummarizingAccountNames: aDictionary) value! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'DR 5/14/2018 21:11:59'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
@@ -611,12 +611,6 @@ value
 	
 	^value! !
 
-
-!CertificateOfDeposit methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:52:28'!
-affect: anObject with: aQuery
-
-	^aQuery affect: anObject asCertificateOfDeposit: self.! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'CertificateOfDeposit class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -645,11 +639,6 @@ AccountTransaction subclass: #Deposit
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
-!Deposit methodsFor: 'initialization' stamp: 'DR 5/14/2018 18:41:04'!
-affect: anObject with: aQuery
-
-	^aQuery affect: anObject asDeposit: self.! !
 
 !Deposit methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:40:53'!
 affectBalance: balance
@@ -710,17 +699,6 @@ AccountTransaction subclass: #Withdraw
 initializeFor: aValue
 
 	value := aValue ! !
-
-
-!Withdraw methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:51:48'!
-affect: anObject with: aQuery
-
-	^aQuery affect: anObject asWithdraw: self.! !
-
-!Withdraw methodsFor: 'oldDD' stamp: 'np 5/15/2018 16:43:12'!
-executeSummarizingAccountQuery: aPortfolioQuery
-
-	^aPortfolioQuery executeForWithdraw: self! !
 
 
 !Withdraw methodsFor: 'value' stamp: 'HernanWilkinson 7/14/2011 05:54'!
@@ -829,12 +807,6 @@ initializeWith: anAccount with: anotherAccount
 initializeWithAll: aCollectionOfAccounts
 
 	accounts := aCollectionOfAccounts   ! !
-
-
-!Portfolio methodsFor: 'oldDD' stamp: 'DR 5/14/2018 20:47:09'!
-executeSummarizingAccountQuery: aPortfolioQuery
-
-	^aPortfolioQuery executeForPortfolio: self! !
 
 
 !Portfolio methodsFor: 'transactions' stamp: 'HAW 8/13/2017 17:47:44'!
@@ -988,11 +960,6 @@ transferNet
 		into: [ :balance :transaction | transaction affectTransferNet: balance ]! !
 
 
-!ReceptiveAccount methodsFor: 'testing' stamp: 'DR 5/14/2018 20:46:36'!
-executeSummarizingAccountQuery: aSummarizingAccountQuery
-
-	^aSummarizingAccountQuery executeForReceptiveAccount: self! !
-
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 manages: anAccount
 
@@ -1076,32 +1043,6 @@ value
 	^investmentEarnings
 			! !
 
-
-!AccountInvestmentEarnings methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:26:55'!
-affect: investmentEarnings asCertificateOfDeposit: aCertificateOfDeposit
-
-	^investmentEarnings + (aCertificateOfDeposit value*(aCertificateOfDeposit tna/360)*(aCertificateOfDeposit numberOfDays))! !
-
-!AccountInvestmentEarnings methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:27:08'!
-affect: investmentEarnings asDeposit: aDeposit
-
-	^investmentEarnings! !
-
-!AccountInvestmentEarnings methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:27:14'!
-affect: investmentEarnings asTransferDeposit: aTransferDeposit
-
-	^investmentEarnings! !
-
-!AccountInvestmentEarnings methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:27:18'!
-affect: investmentEarnings asTransferWithdraw: aTransferWithdraw
-
-	^investmentEarnings! !
-
-!AccountInvestmentEarnings methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:27:23'!
-affect: investmentEarnings asWithdraw: aWithDraw
-
-	^investmentEarnings! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'AccountInvestmentEarnings class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1162,32 +1103,6 @@ value
 	
 	^investmentNet
 			! !
-
-
-!AccountInvestmentNetOf methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:20:42'!
-affect: investmentNet asCertificateOfDeposit: aCertificateOfDeposit
-
-	^investmentNet + aCertificateOfDeposit value! !
-
-!AccountInvestmentNetOf methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:20:52'!
-affect: investmentNet asDeposit: aDeposit
-
-	^investmentNet! !
-
-!AccountInvestmentNetOf methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:20:58'!
-affect: investmentNet asTransferDeposit: aTransferDeposit
-
-	^investmentNet! !
-
-!AccountInvestmentNetOf methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:21:05'!
-affect: investmentNet asTransferWithdraw: aTransferWithdraw
-
-	^investmentNet! !
-
-!AccountInvestmentNetOf methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:21:13'!
-affect: investmentNet asWithdraw: aWithDraw
-
-	^investmentNet! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1255,37 +1170,6 @@ value
 	^summaryLines
 			! !
 
-
-!AccountSummaryLines methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:10:40'!
-affect: summaryLines asCertificateOfDeposit: aCertificateOfDeposit
-
-	summaryLines add: ('Plazo fijo por ', aCertificateOfDeposit value asString, ' durante ', aCertificateOfDeposit numberOfDays asString, ' dias a una tna de ', (aCertificateOfDeposit tna * 100) asString, '%').
-	^summaryLines! !
-
-!AccountSummaryLines methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:09:48'!
-affect: summaryLines asDeposit: aDeposit
-
-	summaryLines add: ('Deposito por ', (aDeposit value asString)).
-	^summaryLines! !
-
-!AccountSummaryLines methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:08:52'!
-affect: summaryLines asTransferDeposit: aTransferDeposit
-
-	summaryLines add: ('Transferencia por ', (aTransferDeposit value asString)).
-	^summaryLines! !
-
-!AccountSummaryLines methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:06:03'!
-affect: summaryLines asTransferWithdraw: aTransferWithdraw
-
-	summaryLines add: ('Transferencia por -', (aTransferWithdraw value asString)).
-	^summaryLines! !
-
-!AccountSummaryLines methodsFor: 'oldDD' stamp: 'DR 5/14/2018 19:04:51'!
-affect: summaryLines asWithdraw: aWithdraw
-
-	summaryLines add: ('Extraccion por ', (aWithdraw value asString)).
-	^summaryLines! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'AccountSummaryLines class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1347,32 +1231,6 @@ value
 	^transferNet
 			! !
 
-
-!AccountTransferNet methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:50:38'!
-affect: transferNet asCertificateOfDeposit: aCertificateOfDeposit
-
-	^transferNet! !
-
-!AccountTransferNet methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:50:33'!
-affect: transferNet asDeposit: aDeposit
-
-	^transferNet! !
-
-!AccountTransferNet methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:50:29'!
-affect: transferNet asTransferDeposit: aTransferDeposit
-
-	^transferNet + aTransferDeposit value! !
-
-!AccountTransferNet methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:50:24'!
-affect: transferNet asTransferWithdraw: aTransferWithdraw
-
-	^transferNet - aTransferWithdraw value! !
-
-!AccountTransferNet methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:50:19'!
-affect: transferNet asWithdraw: aWithDraw
-
-	^transferNet! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'AccountTransferNet class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1392,11 +1250,11 @@ SummarizingAccountQuery subclass: #PortfolioTree
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortfolioTree methodsFor: 'initialization' stamp: 'DR 5/14/2018 20:13:04'!
-initializeFor: anAccount with: aDictionary
+!PortfolioTree methodsFor: 'initialization' stamp: 'np 5/16/2018 22:03:39'!
+initializeFor: anAccount withAccountNames: aDictionaryFromAccountToName
 
 	account _ anAccount.
-	accountsNamesDictionary _ aDictionary .! !
+	accountsNamesDictionary _ aDictionaryFromAccountToName .! !
 
 !PortfolioTree methodsFor: 'initialization' stamp: 'DR 5/14/2018 19:54:03'!
 initializeWith: anAccount
@@ -1404,13 +1262,13 @@ initializeWith: anAccount
 	account _ anAccount! !
 
 
-!PortfolioTree methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 21:27:47'!
+!PortfolioTree methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 22:05:43'!
 queryPortfolio: aPortfolio
 
 	^(aPortfolio managedAccounts
 		inject: OrderedCollection new
 		into: [ :lines :managedAccount |
-			lines, ((PortfolioTree of: managedAccount with: accountsNamesDictionary) value)
+			lines, ((PortfolioTree of: managedAccount withSummarizingAccountNames: accountsNamesDictionary) value)
 	])
 	collect: [ :aString | ' ', aString]
 	
@@ -1434,37 +1292,17 @@ value
 
 	^firstLine, (account answerQuery: self)! !
 
-
-!PortfolioTree methodsFor: 'oldDD' stamp: 'DR 5/14/2018 21:04:46'!
-executeForPortfolio: aPortfolio
-
-	^(aPortfolio managedAccounts
-		inject: OrderedCollection new
-		into: [ :lines :managedAccount |
-			lines, ((PortfolioTree of: managedAccount with: accountsNamesDictionary) value)
-	])
-	collect: [ :aString | ' ', aString]
-	
-	
-	
-
-! !
-
-!PortfolioTree methodsFor: 'oldDD' stamp: 'DR 5/14/2018 21:10:48'!
-executeForReceptiveAccount: aReceptiveAccount
-
-	^OrderedCollection new! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'PortfolioTree class' category: #'PortfolioTreePrinter-Ejercicio'!
 PortfolioTree class
 	instanceVariableNames: ''!
 
-!PortfolioTree class methodsFor: 'as yet unclassified' stamp: 'DR 5/14/2018 20:13:40'!
-of: anAccount with: aDictionary
+!PortfolioTree class methodsFor: 'as yet unclassified' stamp: 'np 5/16/2018 22:04:42'!
+of: anAccount withSummarizingAccountNames: aDictionaryFromAccountToName
 
-	^self new initializeFor: anAccount with: aDictionary ! !
+	^self new initializeFor: anAccount withAccountNames: aDictionaryFromAccountToName
+! !
 
 
 !classDefinition: #Transfer category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1521,17 +1359,6 @@ initializeWith: aTransfer
 	transfer := aTransfer! !
 
 
-!TransferDeposit methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:52:13'!
-affect: anObject with: aQuery
-
-	^aQuery affect: anObject asTransferDeposit: self.! !
-
-!TransferDeposit methodsFor: 'oldDD' stamp: 'np 5/15/2018 16:23:10'!
-executeSummarizingAccountQuery: aPortfolioQuery
-
-	^aPortfolioQuery executeForTransferDeposit: self! !
-
-
 !TransferDeposit methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:18'!
 value
 
@@ -1573,17 +1400,6 @@ Object subclass: #TransferWithdraw
 !TransferWithdraw methodsFor: 'initialization' stamp: 'DR 5/10/2018 20:39:30'!
 initializeWith: aTransfer
 	transfer := aTransfer! !
-
-
-!TransferWithdraw methodsFor: 'oldDD' stamp: 'DR 5/14/2018 18:52:02'!
-affect: anObject with: aQuery
-
-	^aQuery affect: anObject asTransferWithdraw: self.! !
-
-!TransferWithdraw methodsFor: 'oldDD' stamp: 'np 5/15/2018 16:23:28'!
-executeSummarizingAccountQuery: aPortfolioQuery
-
-	^aPortfolioQuery executeForTransferWithdraw: self! !
 
 
 !TransferWithdraw methodsFor: 'value' stamp: 'DR 5/14/2018 18:54:25'!
