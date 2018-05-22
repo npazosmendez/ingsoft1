@@ -1382,63 +1382,6 @@ for: aReceptiveAccount
 	^ self new initializeFor: aReceptiveAccount ! !
 
 
-!classDefinition: #EagerResultProxy category: #'PortfolioTimeConsuming-Ejercicio'!
-Object subclass: #EagerResultProxy
-	instanceVariableNames: 'value semaphore isReady'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTimeConsuming-Ejercicio'!
-
-!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:15:58'!
-at: something
-
-	^self doesNotUnderstand: (Message selector: #at: argument: something)! !
-
-!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:08:06'!
-blockUntilIAmReady
-	
-	isReady ifFalse: [
-		semaphore wait.
-		isReady _ true
-	]! !
-
-!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:08:57'!
-doesNotUnderstand: aMessage
-
-	self blockUntilIAmReady.
-	^value perform: aMessage selector withArguments: aMessage arguments! !
-
-!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:08:27'!
-initializeWith: aClosure
-
-	semaphore := Semaphore new.
-	isReady := false.
-	[ value := aClosure value. semaphore signal. ] fork.
-	
-	^self.! !
-
-!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:03:44'!
-printString
-
-	^self doesNotUnderstand: (Message selector: #printString)! !
-
-!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:13:05'!
-size
-
-	^self doesNotUnderstand: (Message selector: #size)! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'EagerResultProxy class' category: #'PortfolioTimeConsuming-Ejercicio'!
-EagerResultProxy class
-	instanceVariableNames: ''!
-
-!EagerResultProxy class methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 20:44:34'!
-with: aClosure
-
-	^self new initializeWith: aClosure.! !
-
-
 !classDefinition: #ReversePortfolioTreePrinter category: #'PortfolioTimeConsuming-Ejercicio'!
 Object subclass: #ReversePortfolioTreePrinter
 	instanceVariableNames: 'portfolio accountNames'
@@ -1870,3 +1813,49 @@ register: aValue from: sourceAccount to: targetAccount
 	targetAccount register: transfer depositLeg.
 	
 	^ transfer ! !
+
+
+!classDefinition: #EagerResultProxy category: #'PortfolioTimeConsuming-Ejercicio'!
+ProtoObject subclass: #EagerResultProxy
+	instanceVariableNames: 'value semaphore isReady'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!EagerResultProxy methodsFor: 'initialization' stamp: 'DR 5/21/2018 23:10:02'!
+initializeWith: aClosure
+
+	semaphore := Semaphore new.
+	isReady := false.
+	[ value := aClosure value. semaphore signal. ] fork.
+	
+	^self.! !
+
+
+!EagerResultProxy methodsFor: 'forward' stamp: 'DR 5/21/2018 23:12:47'!
+doesNotUnderstand: aMessage
+
+	self blockUntilReady.
+	^ value
+		perform: aMessage selector
+		withArguments: aMessage arguments.! !
+
+
+!EagerResultProxy methodsFor: 'syncronization' stamp: 'DR 5/21/2018 23:13:55'!
+blockUntilReady
+
+	isReady ifFalse: [
+		semaphore wait.
+		isReady _ true
+	].! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'EagerResultProxy class' category: #'PortfolioTimeConsuming-Ejercicio'!
+EagerResultProxy class
+	instanceVariableNames: ''!
+
+!EagerResultProxy class methodsFor: 'instance creation' stamp: 'DR 5/21/2018 23:10:02'!
+with: aClosure
+
+	^self new initializeWith: aClosure.! !
