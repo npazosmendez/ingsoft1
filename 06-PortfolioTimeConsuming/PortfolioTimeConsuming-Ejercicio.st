@@ -615,19 +615,15 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'DR 5/17/2018 21:30:24'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'DR 5/21/2018 22:18:32'!
 lines 
 
-	| lines investmentEarnings semaphore |
+	| lines investmentEarnings |
 	
-	semaphore _ Semaphore new.
+	investmentEarnings := EagerResultProxy with: [ (InvestmentNetVisitor for: account) value ].
+	lines := EagerResultProxy with: [ (AccountSummaryWithInvestmentEarnings for: account) lines. ].
 	
-	[ investmentEarnings := (InvestmentNetVisitor for: account) value printString. semaphore signal.] fork.
-	lines := (AccountSummaryWithInvestmentEarnings for: account) lines.
-	
-	semaphore wait.
-	
-	lines add: 'Inversiones por ', investmentEarnings .
+	lines add: 'Inversiones por ', investmentEarnings printString.
 	
 	 ^ lines! !
 
@@ -656,19 +652,15 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'DR 5/17/2018 21:30:43'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'DR 5/21/2018 21:51:44'!
 lines 
 
-	| lines investmentEarnings semaphore |
-			
-	semaphore _ Semaphore new.
+	| lines investmentEarnings |
 	
-	[ investmentEarnings := (InvestmentEarningVisitor for: account) value printString. semaphore signal. ] fork.
-	lines := (AccountSummary for: account) lines.
-	
-	semaphore wait. 
-	
-	lines add: 'Ganancias por ', investmentEarnings.
+	investmentEarnings := EagerResultProxy with: [ (InvestmentEarningVisitor for: account) value ].
+	lines := EagerResultProxy with: [ (AccountSummary for: account) lines ].
+		
+	lines add: 'Ganancias por ', investmentEarnings printString.
 	
 	 ^ lines! !
 
@@ -1388,6 +1380,63 @@ InvestmentNetVisitor class
 for: aReceptiveAccount 
 	
 	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #EagerResultProxy category: #'PortfolioTimeConsuming-Ejercicio'!
+Object subclass: #EagerResultProxy
+	instanceVariableNames: 'value semaphore isReady'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:15:58'!
+at: something
+
+	^self doesNotUnderstand: (Message selector: #at: argument: something)! !
+
+!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:08:06'!
+blockUntilIAmReady
+	
+	isReady ifFalse: [
+		semaphore wait.
+		isReady _ true
+	]! !
+
+!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:08:57'!
+doesNotUnderstand: aMessage
+
+	self blockUntilIAmReady.
+	^value perform: aMessage selector withArguments: aMessage arguments! !
+
+!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:08:27'!
+initializeWith: aClosure
+
+	semaphore := Semaphore new.
+	isReady := false.
+	[ value := aClosure value. semaphore signal. ] fork.
+	
+	^self.! !
+
+!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:03:44'!
+printString
+
+	^self doesNotUnderstand: (Message selector: #printString)! !
+
+!EagerResultProxy methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 22:13:05'!
+size
+
+	^self doesNotUnderstand: (Message selector: #size)! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'EagerResultProxy class' category: #'PortfolioTimeConsuming-Ejercicio'!
+EagerResultProxy class
+	instanceVariableNames: ''!
+
+!EagerResultProxy class methodsFor: 'as yet unclassified' stamp: 'DR 5/21/2018 20:44:34'!
+with: aClosure
+
+	^self new initializeWith: aClosure.! !
 
 
 !classDefinition: #ReversePortfolioTreePrinter category: #'PortfolioTimeConsuming-Ejercicio'!
