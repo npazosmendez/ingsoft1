@@ -615,13 +615,13 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'DR 5/21/2018 22:18:32'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'np 5/24/2018 00:10:32'!
 lines 
 
 	| lines investmentEarnings |
 	
 	investmentEarnings := EagerResultProxy with: [ (InvestmentNetVisitor for: account) value ].
-	lines := EagerResultProxy with: [ (AccountSummaryWithInvestmentEarnings for: account) lines. ].
+	lines := (AccountSummaryWithInvestmentEarnings for: account) lines.
 	
 	lines add: 'Inversiones por ', investmentEarnings printString.
 	
@@ -652,13 +652,13 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'DR 5/21/2018 21:51:44'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'np 5/24/2018 00:10:20'!
 lines 
 
 	| lines investmentEarnings |
 	
 	investmentEarnings := EagerResultProxy with: [ (InvestmentEarningVisitor for: account) value ].
-	lines := EagerResultProxy with: [ (AccountSummary for: account) lines ].
+	lines := (AccountSummary for: account) lines.
 		
 	lines add: 'Ganancias por ', investmentEarnings printString.
 	
@@ -682,7 +682,6 @@ Object subclass: #AccountTransaction
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
-
 
 !AccountTransaction methodsFor: 'consulting' stamp: 'np 5/17/2018 00:31:55'!
 answerQuery: aQuery
@@ -1432,7 +1431,6 @@ registers: aTransaction
 	self subclassResponsibility ! !
 
 
-
 !SummarizingAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:34'!
 balance
 
@@ -1626,7 +1624,6 @@ registers: aTtransaction
 
 	^ transactions includes: aTtransaction 
 ! !
-
 
 
 !ReceptiveAccount methodsFor: 'consulting' stamp: 'np 5/16/2018 21:26:56'!
