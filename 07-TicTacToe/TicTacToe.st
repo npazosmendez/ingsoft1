@@ -416,33 +416,48 @@ Object subclass: #TicTacToe
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:00:17'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:46:25'!
 OHasWon
-	^self oHasCompletedRow or:
-		[ self oHasCompletedColumn or: [
-				self oHasCompletedRegularDiagonal or: [
-					self oHasCompletedReverseDiagonal ]]]! !
+	^self areWinningPositions: os! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 20:44:18'!
+OOO: aPoint
+	os add: aPoint! !
 
 !TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 19:24:39'!
 Os
 	^os copy! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:00:06'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:46:35'!
 XHasWon
-	^self xHasCompletedRow or:
-		[ self xHasCompletedColumn or: [
-				self xHasCompletedRegularDiagonal or: [
-					self xHasCompletedReverseDiagonal ]]]! !
+	^self areWinningPositions: xs! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 20:44:08'!
+XXX: aPoint
+	xs add: aPoint! !
 
 !TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 19:24:33'!
 Xs
 	^xs copy! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 19:35:40'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:47:05'!
+areWinningPositions: playedPositions	
+	^(self positionsCompleteRow: playedPositions) or:
+		[ (self positionsCompleteColumn: playedPositions) or: [
+				(self positionsCompleteRegularDiagonal: playedPositions) or: [
+					(self positionsCompleteReverseDiagonal: playedPositions) ]]]! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:38:26'!
+errorMessageOf: aSymbolOfAPlayer
+
+	^aSymbolOfAPlayer = #x ifTrue: (self class notXTurnErrorMessage) ifFalse: (self class notOTurnErrorMessage)
+! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 19:27:10'!
 initialize
 	xs _ Set new.
 	os _ Set new.
-	turn _ #x.! !
+	turn _ TicTacToeXTurn with: self.! !
 
 !TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 21:43:53'!
 isOver
@@ -452,75 +467,66 @@ isOver
 isTied
 	^self isOver and: ((self OHasWon or: self XHasWon) not).! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:59:18'!
-oHasCompletedColumn
-	^(1 to: 3) anySatisfy: [:y | (os count: [:position | position y = y ]) = 3 ]
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:32:02'!
+playedPositionsOf: aSymbolOfAPlayer
+
+	^aSymbolOfAPlayer = #x ifTrue: xs ifFalse: os
+! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:08:05'!
+positionsCompleteColumn: positions
+	^(1 to: 3) anySatisfy: [:y | (positions count: [:position | position y = y ]) = 3 ]
 	! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:59:29'!
-oHasCompletedRegularDiagonal
-	^(os includes: 1@1) and: (os includes: 2@2) and: (os includes: 3@3)
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:06:10'!
+positionsCompleteRegularDiagonal: positions
+	^(positions includes: 1@1) and: (positions includes: 2@2) and: (positions includes: 3@3)
 ! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:59:39'!
-oHasCompletedReverseDiagonal
-	^(os includes: 1@3) and: (os includes: 2@2) and: (os includes: 3@1)
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:06:27'!
+positionsCompleteReverseDiagonal: positions
+	^(positions includes: 1@3) and: (positions includes: 2@2) and: (positions includes: 3@1)
 	
 	
 ! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:59:45'!
-oHasCompletedRow
-	^(1 to: 3) anySatisfy: [:x | (os count: [:position | position x = x ]) = 3 ]
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:06:46'!
+positionsCompleteRow: positions
+	^(1 to: 3) anySatisfy: [:x | (positions count: [:position | position x = x ]) = 3 ]
 		
 	
 	
 ! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 21:27:30'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:45:06'!
 putOAt: aPoint
-	((self XHasWon) or: self OHasWon) ifTrue: [self error: self class canNotPlayWhenGameIsOverErrorMessage ].
-	turn = #o ifFalse: [self error: self class notOTurnErrorMessage].
-	
-	((xs includes: aPoint) or: (os includes: aPoint)) ifTrue: [self error: self class positionTakenErrorMessage].
-	
-	os add: aPoint.
-	turn _ #x.! !
+	self raiseErrorIfGameIsOver.
+	self raiseErrorIfPositionTaken: aPoint.
+	turn putOAt: aPoint.
+	turn _ turn next.
+! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 21:27:41'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:45:10'!
 putXAt: aPoint
-	((self XHasWon) or: self OHasWon) ifTrue: [self error: self class canNotPlayWhenGameIsOverErrorMessage ].
-	turn = #x ifFalse: [self error: self class notXTurnErrorMessage].
-
-	((xs includes: aPoint) or: (os includes: aPoint)) ifTrue: [self error: self class positionTakenErrorMessage].
-
-	xs add: aPoint.
-	turn _ #o.! !
-
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:58:55'!
-xHasCompletedColumn
-	^(1 to: 3) anySatisfy: [:y | (xs count: [:position | position y = y ]) = 3 ]
-	! !
-
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:58:59'!
-xHasCompletedRegularDiagonal
-	^(xs includes: 1@1) and: (xs includes: 2@2) and: (xs includes: 3@3)
+	self raiseErrorIfGameIsOver.
+	self raiseErrorIfPositionTaken: aPoint.
+	turn putXAt: aPoint.
+	turn _ turn next.
 ! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:59:03'!
-xHasCompletedReverseDiagonal
-	^(xs includes: 1@3) and: (xs includes: 2@2) and: (xs includes: 3@1)
-	
-	
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:44:49'!
+raiseErrorIfGameIsOver
+	^self isOver ifTrue: [self error: self class canNotPlayWhenGameIsOverErrorMessage].
 ! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 19:59:07'!
-xHasCompletedRow
-	^(1 to: 3) anySatisfy: [:x | (xs count: [:position | position x = x ]) = 3 ]
-		
-	
-	
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:03:35'!
+raiseErrorIfPositionTaken: aPoint
+	^((xs includes: aPoint) or: (os includes: aPoint)) ifTrue: [self error: self class positionTakenErrorMessage].
 ! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 19:32:53'!
+turn: aTurn
+	turn _ aTurn! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -547,3 +553,89 @@ notXTurnErrorMessage
 !TicTacToe class methodsFor: 'as yet unclassified' stamp: 'DR 5/24/2018 20:02:17'!
 positionTakenErrorMessage
 	^'Posición ocupada'! !
+
+
+!classDefinition: #TicTacToeTurn category: #TicTacToe!
+Object subclass: #TicTacToeTurn
+	instanceVariableNames: 'game'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 19:24:47'!
+initializeWith: aGame
+	game _ aGame! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeTurn class' category: #TicTacToe!
+TicTacToeTurn class
+	instanceVariableNames: ''!
+
+!TicTacToeTurn class methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 19:24:30'!
+with: game
+	^self new initializeWith: game! !
+
+
+!classDefinition: #TicTacToeOTurn category: #TicTacToe!
+TicTacToeTurn subclass: #TicTacToeOTurn
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeOTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:33:58'!
+next
+	^(TicTacToeXTurn with: game)	
+! !
+
+!TicTacToeOTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:43:44'!
+putOAt: aPoint
+	game OOO: aPoint.! !
+
+!TicTacToeOTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 19:30:26'!
+putXAt: aPoint
+	self error: game class notXTurnErrorMessage.
+	
+! !
+
+
+!classDefinition: #TicTacToeXTurn category: #TicTacToe!
+TicTacToeTurn subclass: #TicTacToeXTurn
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeXTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:30:41'!
+next
+	^(TicTacToeOTurn with: game)
+! !
+
+!TicTacToeXTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 19:31:01'!
+putOAt: aPoint
+	self error: game class notOTurnErrorMessage.
+	
+! !
+
+!TicTacToeXTurn methodsFor: 'as yet unclassified' stamp: 'DR 5/28/2018 21:34:17'!
+putXAt: aPoint
+	game isOver ifTrue: [self error: game class canNotPlayWhenGameIsOverErrorMessage ].
+	game XXX: aPoint.
+	
+	
+! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeXTurn class' category: #TicTacToe!
+TicTacToeXTurn class
+	instanceVariableNames: ''!
+
+!TicTacToeXTurn class methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:54:34'!
+character
+	^#x! !
+
+!TicTacToeXTurn class methodsFor: 'as yet unclassified' stamp: 'DR 5/27/2018 20:57:48'!
+nextTurn
+	^TicTacToeOTurn ! !
