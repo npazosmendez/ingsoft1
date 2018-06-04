@@ -1059,6 +1059,25 @@ Playing O'.
 	
 	self assert: view show = expected.! !
 
+!TicTacToeViewTest methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:51:11'!
+test06
+	| game expected view |
+	
+	game _ TicTacToe new.
+	view _ TicTacToeView for: game.
+	
+	game markWithXAt: 1@1.
+	game markWithOAt: 2@1.
+	
+	expected _ ' | | 
+-----
+ | | 
+-----
+X|O| 
+Playing X'.
+	
+	self assert: view show = expected.! !
+
 !TicTacToeViewTest methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:56:39'!
 test06ViewShowsXPlayAndOPlay
 	| game expected view |
@@ -1117,7 +1136,7 @@ O Won!!'.
 
 !classDefinition: #TicTacToe category: #TicTacToe!
 Object subclass: #TicTacToe
-	instanceVariableNames: 'state playerOPositions playerXPositions observer'
+	instanceVariableNames: 'state playerOPositions playerXPositions observer lastPositionPlayed lastPlayer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
@@ -1219,28 +1238,27 @@ markAt: aPosition
 
 	^state markAt: aPosition ! !
 
-!TicTacToe methodsFor: 'marking board' stamp: 'np 6/3/2018 23:50:26'!
+!TicTacToe methodsFor: 'marking board' stamp: 'DR 6/4/2018 00:30:49'!
 markWithOAt: aPosition
-
-	observer announceOMarkedAt: aPosition.
+	lastPositionPlayed _ aPosition.
+	lastPlayer _ $O.
 
 	self assertIsInBoardBounds: aPosition.
 	
 	state markWithOAt: aPosition.
-	
-	observer announceState: state.
-	! !
 
-!TicTacToe methodsFor: 'marking board' stamp: 'DR 5/31/2018 20:26:40'!
+	observer announceChange.	! !
+
+!TicTacToe methodsFor: 'marking board' stamp: 'DR 6/4/2018 00:27:26'!
 markWithXAt: aPosition
-
-	observer announceXMarkedAt: aPosition.
-
+	lastPositionPlayed _ aPosition.
+	lastPlayer _ $X.
+	
 	self assertIsInBoardBounds: aPosition.
 	
 	state markWithXAt: aPosition.
-	
-	observer announceState: state.! !
+
+	observer announceChange.! !
 
 
 !TicTacToe methodsFor: 'marking board - private' stamp: 'HAW 10/25/2017 15:41:25'!
@@ -1260,6 +1278,14 @@ assertIsFree: aPosition
 assertIsInBoardBounds: aPosition
 
 	(aPosition between: 1@1 and: 3@3) ifFalse: [ self error: self class positionOutsideBoardErrorMessage ]! !
+
+!TicTacToe methodsFor: 'marking board - private' stamp: 'DR 6/4/2018 00:12:30'!
+lastPlayer
+	^lastPlayer copy! !
+
+!TicTacToe methodsFor: 'marking board - private' stamp: 'DR 6/4/2018 00:12:45'!
+lastPositionPlayed
+	^lastPositionPlayed! !
 
 !TicTacToe methodsFor: 'marking board - private' stamp: 'JG 5/12/2018 12:34:04'!
 markWithOWhenPlayingOAt: aPosition
@@ -1315,16 +1341,6 @@ isTied
 	^ state isTied! !
 
 
-!TicTacToe methodsFor: 'testing playing turn' stamp: 'HAW 10/25/2017 16:17:38'!
-isPlayingO
-	
-	^state isPlayingO! !
-
-!TicTacToe methodsFor: 'testing playing turn' stamp: 'HAW 10/25/2017 16:17:14'!
-isPlayingX
-	
-	^state isPlayingX ! !
-
 
 !TicTacToe methodsFor: 'testing board positions' stamp: 'HAW 10/25/2017 15:50:52'!
 isTaken: aPosition
@@ -1377,6 +1393,14 @@ hasWin: positions
 		
 	! !
 
+!TicTacToe methodsFor: 'game over testing - private' stamp: 'DR 6/4/2018 00:28:34'!
+isPlayingO
+	^state isKindOf: PlayingO ! !
+
+!TicTacToe methodsFor: 'game over testing - private' stamp: 'DR 6/4/2018 00:28:39'!
+isPlayingX
+	^state isKindOf: PlayingX! !
+
 !TicTacToe methodsFor: 'game over testing - private' stamp: 'HAW 10/26/2017 12:44:42'!
 shouldBeTiedWhenNoOneWon
 
@@ -1391,7 +1415,7 @@ addObserver: anObserver
 
 !classDefinition: 'TicTacToe class' category: #TicTacToe!
 TicTacToe class
-	instanceVariableNames: ''!
+	instanceVariableNames: 'lastPlay'!
 
 !TicTacToe class methodsFor: 'as yet unclassified' stamp: 'HAW 10/24/2017 17:12:48'!
 canNotPlayWhenGameIsOverErrorMessage
@@ -1421,10 +1445,30 @@ positionTakenErrorMessage
 
 !classDefinition: #TicTacToeConsole category: #TicTacToe!
 Object subclass: #TicTacToeConsole
-	instanceVariableNames: 'log'
+	instanceVariableNames: 'log game'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
+
+!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'DR 6/4/2018 00:21:00'!
+announceChange
+
+	(game lastPlayer = $O) ifTrue: [
+		log add: 'O marcó en ', game lastPositionPlayed asString.
+	] ifFalse: [
+		log add: 'X marcó en ', game lastPositionPlayed asString.
+	].
+
+	game isOver 
+		ifTrue: [
+			game hasPlayerOWon ifTrue: [ log add: 'Estado: Juego terminado - Ganó O!!' ].
+			game hasPlayerXWon ifTrue: [ log add: 'Estado: Juego terminado - Ganó X!!' ].
+			game isTied ifTrue: [ log add: 'Estado: Juego terminado - Empate!!' ].
+		]
+		ifFalse: [
+			game isPlayingO ifTrue:  [ log add: 'Estado: Jugando O' ].
+			game isPlayingX ifTrue:  [ log add: 'Estado: Jugando X' ].			
+		]! !
 
 !TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'DR 5/31/2018 20:30:14'!
 announceOMarkedAt: aPosition
@@ -1447,9 +1491,10 @@ announceXMarkedAt: aPosition
 	log add: 'X marcó en ', aPosition asString.
 ! !
 
-!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'DR 5/31/2018 19:59:47'!
-initialize
+!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'DR 6/4/2018 00:04:01'!
+initializeFor: aTicTacToe
 	log _ OrderedCollection new.
+	game _ aTicTacToe.
 	^self.
 	! !
 
@@ -1463,12 +1508,12 @@ log
 TicTacToeConsole class
 	instanceVariableNames: ''!
 
-!TicTacToeConsole class methodsFor: 'as yet unclassified' stamp: 'DR 5/31/2018 19:58:07'!
+!TicTacToeConsole class methodsFor: 'as yet unclassified' stamp: 'DR 6/4/2018 00:03:28'!
 for: aTicTacToe
 
 	| newConsole |
 	
-	newConsole _ self basicNew initialize.
+	newConsole _ self basicNew initializeFor: aTicTacToe.
 	
 	aTicTacToe addObserver: newConsole. 
 	
@@ -1497,6 +1542,7 @@ putOAt: aPosition inGame: aGame
 putXAt: aPosition inGame: aGame
 
 	self shouldBeImplemented.! !
+
 
 
 !TicTacToeState methodsFor: 'transition' stamp: 'DR 5/31/2018 00:15:28'!
@@ -1810,6 +1856,14 @@ from: beginning downto: end execute: aClosure separatedBy: aSeparatorClosure
 	].
 ! !
 
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:38:00'!
+from: beginning to: end by: step execute: aClosure separatedBy: aSeparatorClosure
+	beginning to: end by: step do: [ :index |
+		aClosure value: index.
+		(index ~= end) ifTrue: [ aSeparatorClosure value ]. 
+	].
+! !
+
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 21:55:39'!
 from: beginning to: end execute: aClosure separatedBy: aSeparatorClosure
 	beginning to: end do: [ :index |
@@ -1837,6 +1891,12 @@ markBoardAt: aPosition with: aCharacter
 
 	((board at: aPosition y) at: aPosition x put: aCharacter)! !
 
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:49:29'!
+print: aCharacter if: aCondition into: aStream
+	aCondition
+		ifTrue: [ aStream nextPut: aCharacter ]
+		ifFalse: [ aStream nextPutAll: ' ' ].! !
+
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 22:08:44'!
 printBoard
 	^String streamContents: [ :stream |
@@ -1845,6 +1905,14 @@ printBoard
 		self printRow: 2 into: stream.
 		self printRowSeparatorInto: stream.
 		self printRow: 1 into: stream.
+	]! !
+
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:53:56'!
+printBoardMarkedAt: aPosition with: aCharacter
+	^String streamContents: [ :stream |
+		self from: 3 to: 1 by: -1
+			execute: [ :row | self printRow: row ofABoardMarkedAt: aPosition with: aCharacter into: stream. ]
+			separatedBy: [ self printRowSeparatorInto: stream.].
 	]! !
 
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:20:32'!
@@ -1866,6 +1934,20 @@ printRow: row into: aStream
 	self from: 1 to: 3
 		execute: [ :column | aStream nextPut: ((board at: row) at: column). ]
 		separatedBy: [ aStream nextPut: $|.].! !
+
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:48:00'!
+printRow: aRowNumber ofABoardMarkedAt: aPosition with: aCharacter into: aStream
+	(aPosition y = aRowNumber) ifTrue: [
+		self printRowMarkedAt: aPosition x with: aCharacter into: aStream.
+	] ifFalse: [
+		aStream nextPutAll: ' | | '.
+	].! !
+
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:49:12'!
+printRowMarkedAt: aMarkedIndex with: aCharacter into: aStream
+	self from: 1 to: 3 by: 1
+		execute: [ :anIndex | self print: aCharacter if: aMarkedIndex = anIndex into: aStream. ]
+		separatedBy: [ aStream nextPut: $|. ].! !
 
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 21:56:16'!
 printRowSeparatorInto: aStream
