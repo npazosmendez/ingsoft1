@@ -1059,8 +1059,8 @@ Playing O'.
 	
 	self assert: view show = expected.! !
 
-!TicTacToeViewTest methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 19:51:11'!
-test06
+!TicTacToeViewTest methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:56:39'!
+test06ViewShowsXPlayAndOPlay
 	| game expected view |
 	
 	game _ TicTacToe new.
@@ -1075,6 +1075,42 @@ test06
 -----
 X|O| 
 Playing X'.
+	
+	self assert: view show = expected.! !
+
+!TicTacToeViewTest methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:21:46'!
+test07ViewShowsXWin
+	| game expected view |
+	
+	game _ TicTacToe new.
+	view _ TicTacToeView for: game.
+	
+	game markAll: { 1@1. 2@2. 1@2. 3@3. 1@3}.
+	
+	expected _ 'X| |O
+-----
+X|O| 
+-----
+X| | 
+X Won!!'.
+	
+	self assert: view show = expected.! !
+
+!TicTacToeViewTest methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:29:16'!
+test08ViewShowsOWin
+	| game expected view |
+	
+	game _ TicTacToe new.
+	view _ TicTacToeView for: game.
+	
+	game markAll: { 2@3. 1@1. 2@2. 1@2. 3@3. 1@3}.
+	
+	expected _ 'O|X|X
+-----
+O|X| 
+-----
+O| | 
+O Won!!'.
 	
 	self assert: view show = expected.! !
 
@@ -1183,7 +1219,7 @@ markAt: aPosition
 
 	^state markAt: aPosition ! !
 
-!TicTacToe methodsFor: 'marking board' stamp: 'DR 5/31/2018 20:30:35'!
+!TicTacToe methodsFor: 'marking board' stamp: 'np 6/3/2018 23:50:26'!
 markWithOAt: aPosition
 
 	observer announceOMarkedAt: aPosition.
@@ -1192,7 +1228,8 @@ markWithOAt: aPosition
 	
 	state markWithOAt: aPosition.
 	
-	observer announceState: state.! !
+	observer announceState: state.
+	! !
 
 !TicTacToe methodsFor: 'marking board' stamp: 'DR 5/31/2018 20:26:40'!
 markWithXAt: aPosition
@@ -1462,7 +1499,6 @@ putXAt: aPosition inGame: aGame
 	self shouldBeImplemented.! !
 
 
-
 !TicTacToeState methodsFor: 'transition' stamp: 'DR 5/31/2018 00:15:28'!
 nextStateOf: aGame
 
@@ -1725,31 +1761,46 @@ markWithXAt: aPosition
 
 !classDefinition: #TicTacToeView category: #TicTacToe!
 Object subclass: #TicTacToeView
-	instanceVariableNames: 'board currentPlayer'
+	instanceVariableNames: 'board currentPlayer game'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 21:49:29'!
-announceOMarkedAt: aPosition! !
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:55:27'!
+announceOMarkedAt: aPosition
+
+	self markBoardAt: aPosition with: $O.
+	currentPlayer _ 'X'
+! !
 
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 17:49:16'!
 announceState: aState
 ! !
 
-!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 22:16:38'!
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:53:31'!
 announceXMarkedAt: aPosition
 
-	self markBoardAt: aPosition with: 'X'.
-	currentPlayer _ 'O'.
+	self markBoardAt: aPosition with: $X.
+	currentPlayer _ 'O'
 ! !
 
-!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 22:15:19'!
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:50:06'!
 emptyBoard
-	^#(#(' '   ' '   ' ')
-	     #(' '   ' '   ' ')
-	     #(' '   ' '   ' '))
-! !
+	| anEmptyBoard |
+	
+	anEmptyBoard _ OrderedCollection new.
+	3 timesRepeat: [ anEmptyBoard add: self emptyRow].
+
+	^anEmptyBoard! !
+
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:50:13'!
+emptyRow
+	| aRow |
+	
+	aRow _ OrderedCollection new.
+	3 timesRepeat: [aRow add: $ .].
+	
+	^aRow! !
 
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 22:05:57'!
 from: beginning downto: end execute: aClosure separatedBy: aSeparatorClosure
@@ -1767,8 +1818,16 @@ from: beginning to: end execute: aClosure separatedBy: aSeparatorClosure
 	].
 ! !
 
-!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 21:48:57'!
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:51:51'!
 initialize
+	board _ self emptyBoard.
+	currentPlayer _ 'X'.
+! !
+
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:03:20'!
+initializeFor: aTicTacToe
+
+	game _ aTicTacToe.
 	board _ self emptyBoard.
 	currentPlayer _ 'X'.
 ! !
@@ -1788,11 +1847,25 @@ printBoard
 		self printRow: 1 into: stream.
 	]! !
 
-!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 22:17:10'!
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:20:32'!
+printGameState
+	game isOver 
+		ifTrue: [
+			game hasPlayerOWon
+				ifTrue: [^'O Won!!'].
+			game hasPlayerXWon
+				ifTrue: [^'X Won!!'].
+			]
+		ifFalse: [
+ 			^'Playing ', currentPlayer			
+			]
+! !
+
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 22:52:13'!
 printRow: row into: aStream
 	self from: 1 to: 3
-		execute: [ :column | aStream nextPutAll: ((board at: row) at: column). ]
-		separatedBy: [ aStream nextPutAll: '|'.].! !
+		execute: [ :column | aStream nextPut: ((board at: row) at: column). ]
+		separatedBy: [ aStream nextPut: $|.].! !
 
 !TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 21:56:16'!
 printRowSeparatorInto: aStream
@@ -1800,10 +1873,10 @@ printRowSeparatorInto: aStream
 -----
 '.! !
 
-!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 21:48:25'!
+!TicTacToeView methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:21:16'!
 show
-	^ self printBoard, '
-', 'Playing ', currentPlayer! !
+	^ self printBoard,'
+', self printGameState! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1811,12 +1884,12 @@ show
 TicTacToeView class
 	instanceVariableNames: ''!
 
-!TicTacToeView class methodsFor: 'as yet unclassified' stamp: 'DR 6/3/2018 22:15:42'!
+!TicTacToeView class methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:02:56'!
 for: aTicTacToe
 
 	| newView |
 	
-	newView _ self basicNew initialize.
+	newView _ self basicNew initializeFor: aTicTacToe.
 	
 	aTicTacToe addObserver: newView. 
 	

@@ -1,0 +1,102 @@
+Implementar por medio de TDD lo necesario para que se pueda tener una consola (log) y una vista sobre el TicTacToe sin que este lo sepa. O sea, el TicTacToe no debe saber que una consola o una vista están atentos a los cambios que se produce en él.
+La solución debe permitir sin ser modificada, agregar nuevos objetos atentos a los cambios del TicTacToe (por ejemplo uno que genere un post de http por cada cambio).
+
+Ejemplo de qué se debe observar en la consola cuando se juega con un juego recién iniciado:
+Acciones: 
+ticTacToe markWithXAt: 2@2
+Consola:
+X marcó en 2@2
+Estado: Jugando O
+
+Acciones: 
+ticTacToe markWithXAt: 2@2
+ticTacToe markWithOAt: 1@1
+Consola:
+X marcó en 2@2
+Estado: Jugando O
+O marcó en 1@1
+Estado: Jugando X
+
+Acciones: 
+ticTacToe markWithXAt: 2@2
+ticTacToe markWithOAt: 1@1
+ticTacToe markWithXAt: 1@3
+Consola:
+X marcó en 2@2
+Estado: Jugando O
+O marcó en 1@1
+Estado: Jugando X
+X marcó en 1@3
+Estado: Jugando O
+
+Acciones: (juego completo)
+ticTacToe markWithXAt: 2@2
+ticTacToe markWithOAt: 1@1
+ticTacToe markWithXAt: 1@3
+ticTacToe markWithOAt: 1@2
+ticTacToe markWithXAt: 3@1
+Consola:
+X marcó en 2@2
+Estado: Jugando O
+O marcó en 1@1
+Estado: Jugando X
+X marcó en 1@3
+Estado: Jugando O
+O marcó en 1@2
+Estado: Jugando X
+X marcó en 3@1
+Estado: Juego terminado - Ganó X!
+
+Tener en cuenta que también debe soportar que gane O y que el juego salga empatado.
+
+En la vista debería verse el estado del tablero:
+Acciones: 
+ticTacToe markWithXAt: 2@2
+Vista:
+ | | 
+-----
+ |X| 
+-----
+ | | 
+Playing O
+ 
+Acciones: 
+ticTacToe markWithXAt: 2@2
+ticTacToe markWithOAt: 1@1
+Vista:
+ | | 
+-----
+ |X| 
+-----
+O| | 
+Playing X
+
+Acciones: 
+ticTacToe markWithXAt: 2@2
+ticTacToe markWithOAt: 1@1
+ticTacToe markWithXAt: 1@3
+Vista:
+X| | 
+-----
+ |X| 
+-----
+O| | 
+Playing O
+
+Acciones: (juego completo)
+ticTacToe markWithXAt: 2@2
+ticTacToe markWithOAt: 1@1
+ticTacToe markWithXAt: 1@3
+ticTacToe markWithOAt: 1@2
+ticTacToe markWithXAt: 3@1
+Vista:
+X| | 
+-----
+O|X| 
+-----
+O| |X
+X Won!
+
+Tener en cuenta que también debe soportar que gane O y que el juego salga empatado.
+También recordar que se puede usar una consola y vista del juego al mismo tiempo.
+
