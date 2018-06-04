@@ -1388,9 +1388,9 @@ shouldBeTiedWhenNoOneWon
 	^ playerXPositions size = 5 and: [ playerOPositions size = 4 ].! !
 
 
-!TicTacToe methodsFor: 'observation' stamp: 'np 6/4/2018 00:35:39'!
-addObserver: anObserver
-	observers add: anObserver! !
+!TicTacToe methodsFor: 'observation' stamp: 'np 6/4/2018 15:01:51'!
+addObserver: aTicTacToeObserver
+	observers add: aTicTacToeObserver! !
 
 
 !TicTacToe methodsFor: 'players' stamp: 'np 6/4/2018 00:46:08'!
@@ -1446,9 +1446,22 @@ positionTakenErrorMessage
 	^'Position taken'! !
 
 
+!classDefinition: #TicTacToeObserver category: #TicTacToe!
+Object subclass: #TicTacToeObserver
+	instanceVariableNames: 'game'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeObserver methodsFor: 'notification' stamp: 'np 6/4/2018 14:58:36'!
+announceChange
+
+	self subclassResponsibility! !
+
+
 !classDefinition: #TicTacToeConsole category: #TicTacToe!
-Object subclass: #TicTacToeConsole
-	instanceVariableNames: 'log game'
+TicTacToeObserver subclass: #TicTacToeConsole
+	instanceVariableNames: 'log'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
@@ -1497,6 +1510,116 @@ for: aTicTacToe
 	aTicTacToe addObserver: newConsole. 
 	
 	^newConsole
+! !
+
+
+!classDefinition: #TicTacToeView category: #TicTacToe!
+TicTacToeObserver subclass: #TicTacToeView
+	instanceVariableNames: 'board currentState'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeView methodsFor: 'notification' stamp: 'np 6/4/2018 00:57:12'!
+announceChange
+	self markBoardAt: game lastPositionPlayed with: game lastPlayer.
+	
+	game isOver 
+		ifTrue: [
+			game isTied
+				ifTrue: [currentState _ 'Tied!!']
+				ifFalse: [currentState _ game lastPlayer asString, ' Won!!']
+			]
+		ifFalse: [
+ 			currentState _'Playing ', game currentPlayer asString
+			]			
+	
+! !
+
+
+!TicTacToeView methodsFor: 'initialization' stamp: 'np 6/3/2018 22:50:06'!
+emptyBoard
+	| anEmptyBoard |
+	
+	anEmptyBoard _ OrderedCollection new.
+	3 timesRepeat: [ anEmptyBoard add: self emptyRow].
+
+	^anEmptyBoard! !
+
+!TicTacToeView methodsFor: 'initialization' stamp: 'np 6/3/2018 22:50:13'!
+emptyRow
+	| aRow |
+	
+	aRow _ OrderedCollection new.
+	3 timesRepeat: [aRow add: $ .].
+	
+	^aRow! !
+
+!TicTacToeView methodsFor: 'initialization' stamp: 'np 6/4/2018 00:22:56'!
+initializeFor: aTicTacToe
+
+	game _ aTicTacToe.
+	board _ self emptyBoard.
+	currentState _ 'Playing X'.
+! !
+
+
+!TicTacToeView methodsFor: 'drawing - private' stamp: 'DR 6/3/2018 21:52:18'!
+markBoardAt: aPosition with: aCharacter
+
+	((board at: aPosition y) at: aPosition x put: aCharacter)! !
+
+!TicTacToeView methodsFor: 'drawing - private' stamp: 'np 6/4/2018 01:05:10'!
+printBoard
+	^String streamContents: [ :aStream |
+		self from: 3 to: 1 step: -1
+			execute: [ :row | self printRow: row into: aStream ]
+			separatedBy: [ self printRowSeparatorInto: aStream.].
+		]! !
+
+!TicTacToeView methodsFor: 'drawing - private' stamp: 'np 6/4/2018 01:02:46'!
+printRow: row into: aStream
+	self from: 1 to: 3 step: 1
+		execute: [ :column | aStream nextPut: ((board at: row) at: column). ]
+		separatedBy: [ aStream nextPut: $|.].! !
+
+!TicTacToeView methodsFor: 'drawing - private' stamp: 'DR 6/3/2018 21:56:16'!
+printRowSeparatorInto: aStream
+	aStream nextPutAll: '
+-----
+'.! !
+
+
+!TicTacToeView methodsFor: 'observation' stamp: 'np 6/4/2018 00:20:55'!
+show
+	^ self printBoard,'
+', currentState copy! !
+
+
+!TicTacToeView methodsFor: 'utils - private' stamp: 'np 6/4/2018 01:02:27'!
+from: aBeginning to: anEnd step: aStep execute: aClosure separatedBy: aSeparatorClosure
+	aBeginning to: anEnd by: aStep do: [ :index |
+		aClosure value: index.
+		(index ~= anEnd) ifTrue: [ aSeparatorClosure value ]. 
+	].
+! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeView class' category: #TicTacToe!
+TicTacToeView class
+	instanceVariableNames: ''!
+
+!TicTacToeView class methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:02:56'!
+for: aTicTacToe
+
+	| newView |
+	
+	newView _ self basicNew initializeFor: aTicTacToe.
+	
+	aTicTacToe addObserver: newView. 
+	
+	^newView
 ! !
 
 
@@ -1781,113 +1904,3 @@ markWithOAt: aPosition
 !PlayingX methodsFor: 'marking board' stamp: 'HAW 10/26/2017 12:30:46'!
 markWithXAt: aPosition
 	game markWithXWhenPlayingXAt: aPosition.! !
-
-
-!classDefinition: #TicTacToeView category: #TicTacToe!
-Object subclass: #TicTacToeView
-	instanceVariableNames: 'board currentState game'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TicTacToe'!
-
-!TicTacToeView methodsFor: 'notification' stamp: 'np 6/4/2018 00:57:12'!
-announceChange
-	self markBoardAt: game lastPositionPlayed with: game lastPlayer.
-	
-	game isOver 
-		ifTrue: [
-			game isTied
-				ifTrue: [currentState _ 'Tied!!']
-				ifFalse: [currentState _ game lastPlayer asString, ' Won!!']
-			]
-		ifFalse: [
- 			currentState _'Playing ', game currentPlayer asString
-			]			
-	
-! !
-
-
-!TicTacToeView methodsFor: 'initialization' stamp: 'np 6/3/2018 22:50:06'!
-emptyBoard
-	| anEmptyBoard |
-	
-	anEmptyBoard _ OrderedCollection new.
-	3 timesRepeat: [ anEmptyBoard add: self emptyRow].
-
-	^anEmptyBoard! !
-
-!TicTacToeView methodsFor: 'initialization' stamp: 'np 6/3/2018 22:50:13'!
-emptyRow
-	| aRow |
-	
-	aRow _ OrderedCollection new.
-	3 timesRepeat: [aRow add: $ .].
-	
-	^aRow! !
-
-!TicTacToeView methodsFor: 'initialization' stamp: 'np 6/4/2018 00:22:56'!
-initializeFor: aTicTacToe
-
-	game _ aTicTacToe.
-	board _ self emptyBoard.
-	currentState _ 'Playing X'.
-! !
-
-
-!TicTacToeView methodsFor: 'drawing - private' stamp: 'DR 6/3/2018 21:52:18'!
-markBoardAt: aPosition with: aCharacter
-
-	((board at: aPosition y) at: aPosition x put: aCharacter)! !
-
-!TicTacToeView methodsFor: 'drawing - private' stamp: 'np 6/4/2018 01:05:10'!
-printBoard
-	^String streamContents: [ :aStream |
-		self from: 3 to: 1 step: -1
-			execute: [ :row | self printRow: row into: aStream ]
-			separatedBy: [ self printRowSeparatorInto: aStream.].
-		]! !
-
-!TicTacToeView methodsFor: 'drawing - private' stamp: 'np 6/4/2018 01:02:46'!
-printRow: row into: aStream
-	self from: 1 to: 3 step: 1
-		execute: [ :column | aStream nextPut: ((board at: row) at: column). ]
-		separatedBy: [ aStream nextPut: $|.].! !
-
-!TicTacToeView methodsFor: 'drawing - private' stamp: 'DR 6/3/2018 21:56:16'!
-printRowSeparatorInto: aStream
-	aStream nextPutAll: '
------
-'.! !
-
-
-!TicTacToeView methodsFor: 'observation' stamp: 'np 6/4/2018 00:20:55'!
-show
-	^ self printBoard,'
-', currentState copy! !
-
-
-!TicTacToeView methodsFor: 'utils - private' stamp: 'np 6/4/2018 01:02:27'!
-from: aBeginning to: anEnd step: aStep execute: aClosure separatedBy: aSeparatorClosure
-	aBeginning to: anEnd by: aStep do: [ :index |
-		aClosure value: index.
-		(index ~= anEnd) ifTrue: [ aSeparatorClosure value ]. 
-	].
-! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TicTacToeView class' category: #TicTacToe!
-TicTacToeView class
-	instanceVariableNames: ''!
-
-!TicTacToeView class methodsFor: 'as yet unclassified' stamp: 'np 6/3/2018 23:02:56'!
-for: aTicTacToe
-
-	| newView |
-	
-	newView _ self basicNew initializeFor: aTicTacToe.
-	
-	aTicTacToe addObserver: newView. 
-	
-	^newView
-! !
