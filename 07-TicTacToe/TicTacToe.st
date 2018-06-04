@@ -582,29 +582,29 @@ Object subclass: #TicTacToeState
 !TicTacToeState methodsFor: 'playing' stamp: 'DR 5/31/2018 00:51:57'!
 OHasWon
 
-	self shouldBeImplemented.! !
+	self subclassResponsibility.! !
 
 !TicTacToeState methodsFor: 'playing' stamp: 'DR 5/31/2018 00:15:35'!
 putOAt: aPosition inGame: aGame
 
-	self shouldBeImplemented.! !
+	self subclassResponsibility.! !
 
 !TicTacToeState methodsFor: 'playing' stamp: 'DR 5/31/2018 00:15:37'!
 putXAt: aPosition inGame: aGame
 
-	self shouldBeImplemented.! !
+	self subclassResponsibility.! !
 
 
 !TicTacToeState methodsFor: 'endgame' stamp: 'DR 5/31/2018 00:15:32'!
 isOver
 
-	self shouldBeImplemented.! !
+	self subclassResponsibility.! !
 
 
 !TicTacToeState methodsFor: 'transition' stamp: 'DR 5/31/2018 00:15:28'!
 nextStateOf: aGame
 
-	self shouldBeImplemented.! !
+	self subclassResponsibility.! !
 
 
 !classDefinition: #TicTacToeEnd category: #TicTacToStep21!
