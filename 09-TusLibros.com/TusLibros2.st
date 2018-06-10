@@ -5,12 +5,12 @@ TestCase subclass: #TusLibrosTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 13:20:58'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/10/2018 13:20:58'!
 createCart
 	
 	^Cart acceptingItemsOf: self defaultCatalog! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:08:07'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/10/2018 17:08:07'!
 createCartWithItem
 	
 	| cart |
@@ -20,7 +20,7 @@ createCartWithItem
 	
 	^cart! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:06:43'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/10/2018 17:06:43'!
 createCashierWithItemPriced: aPrice
 
 	| priceTable |
@@ -30,22 +30,22 @@ createCashierWithItemPriced: aPrice
 	
 	^Cashier with: priceTable.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/7/2018 19:42:52'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/7/2018 19:42:52'!
 defaultCatalog
 	
 	^ Array with: self itemSellByTheStore! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/7/2018 19:43:00'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/7/2018 19:43:00'!
 itemNotSellByTheStore
 	
 	^'invalidBook'! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/7/2018 19:43:09'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/7/2018 19:43:09'!
 itemSellByTheStore
 	
 	^ 'validBook'! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 16:58:28'!
+!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/10/2018 16:58:28'!
 should: aBlock raise: anExceptonHandlingCondition withMessage: anErrorMessage
 	
 	self
@@ -155,7 +155,7 @@ TusLibrosTest subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:54'!
+!CashierTest methodsFor: 'tests' stamp: 'DR 6/10/2018 17:24:54'!
 test01CashierCanNotCheckoutEmptyCart
 
 	| cart cashier creditCard |
@@ -170,7 +170,7 @@ test01CashierCanNotCheckoutEmptyCart
 		withMessage: Cashier canNotCheckoutEmptyCartErrorMessage.
 		! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:25'!
+!CashierTest methodsFor: 'tests' stamp: 'DR 6/10/2018 17:32:52'!
 test02CashierCheckoutsCartWithItemsAndReturnsBill
 
 	| bill cart cashier creditCard |
@@ -183,14 +183,14 @@ test02CashierCheckoutsCartWithItemsAndReturnsBill
 	
 	self assert: bill equals: 10.! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:51'!
+!CashierTest methodsFor: 'tests' stamp: 'DR 6/10/2018 17:32:12'!
 test03CashierCanNotCheckoutFromExpiredCreditCard
 
 	| cart cashier creditCard |
 	
 	cart _ self createCartWithItem.
 	creditCard _ CreditCard withExpirationDate: FixedGregorianDate yesterday.
-	cashier _ self createCashierWithItemPriced: 10.
+	cashier _ Cashier new.
 	
 	self
 		should: [ cashier checkout: cart using: creditCard ]
@@ -265,12 +265,9 @@ add: aQuantity of: anItem
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
 
 
-!Cart methodsFor: 'cost' stamp: 'DR 6/10/2018 16:27:47'!
+!Cart methodsFor: 'cost' stamp: 'DR 6/10/2018 17:30:40'!
 costFrom: aPriceTable
-	^ items
-		inject: 0
-		into: [ :acc :item |
-			acc + aPriceTable at: item ].! !
+	^ items inject: 0 into: [ :acc :item | acc + aPriceTable at: item ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -291,17 +288,24 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:10:11'!
+!Cashier methodsFor: 'assertions' stamp: 'DR 6/10/2018 17:10:11'!
 assertCartIsNotEmpty: aCart
 
 	aCart isEmpty ifTrue: [ self error: self class canNotCheckoutEmptyCartErrorMessage ].! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:10:15'!
+!Cashier methodsFor: 'assertions' stamp: 'DR 6/10/2018 17:10:15'!
 assertCreditCardIsNotExpired: aCreditCard
 
 	aCreditCard isExpired ifTrue: [ self error: self class canNotCheckoutWithExpiredCreditCardErrorMessage ].! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:34'!
+
+!Cashier methodsFor: 'initialization' stamp: 'DR 6/10/2018 16:42:02'!
+initializeWith: aPriceTable 
+
+	priceTable _ aPriceTable.! !
+
+
+!Cashier methodsFor: 'checkout' stamp: 'DR 6/10/2018 17:24:34'!
 checkout: aCart using: aCreditCard
 
 	| total |
@@ -315,14 +319,9 @@ checkout: aCart using: aCreditCard
 	
 	^ total.! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/7/2018 20:51:04'!
+!Cashier methodsFor: 'checkout' stamp: 'DR 6/7/2018 20:51:04'!
 debit: ammount from: aCreditCard
 	! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 16:42:02'!
-initializeWith: aPriceTable 
-
-	priceTable _ aPriceTable.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -353,12 +352,13 @@ Object subclass: #CreditCard
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CreditCard methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 16:43:37'!
+!CreditCard methodsFor: 'initialization' stamp: 'DR 6/10/2018 16:43:37'!
 initializeWithExpirationDate: anExpirationDate
 
 	expirationDate _ anExpirationDate! !
 
-!CreditCard methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 16:43:34'!
+
+!CreditCard methodsFor: 'expiration' stamp: 'DR 6/10/2018 16:43:34'!
 isExpired
 
 	^FixedGregorianDate today > expirationDate! !
