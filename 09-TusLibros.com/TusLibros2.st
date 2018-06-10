@@ -155,7 +155,7 @@ TusLibrosTest subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:16:07'!
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:54'!
 test01CashierCanNotCheckoutEmptyCart
 
 	| cart cashier creditCard |
@@ -165,12 +165,12 @@ test01CashierCanNotCheckoutEmptyCart
 	cashier _ Cashier new.
 	
 	self
-		should: [ cashier cash: cart using: creditCard ]
+		should: [ cashier checkout: cart using: creditCard ]
 		raise: Error - MessageNotUnderstood
 		withMessage: Cashier canNotCheckoutEmptyCartErrorMessage.
 		! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:16:22'!
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:25'!
 test02CashierCheckoutsCartWithItemsAndReturnsBill
 
 	| bill cart cashier creditCard |
@@ -179,11 +179,11 @@ test02CashierCheckoutsCartWithItemsAndReturnsBill
 	creditCard _ CreditCard withExpirationDate: FixedGregorianDate tomorrow.
 	cashier _ self createCashierWithItemPriced: 10.
 		
-	bill _ cashier cash: cart using: creditCard.
+	bill _ cashier checkout: cart using: creditCard.
 	
 	self assert: bill equals: 10.! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:16:27'!
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:51'!
 test03CashierCanNotCheckoutFromExpiredCreditCard
 
 	| cart cashier creditCard |
@@ -193,7 +193,7 @@ test03CashierCanNotCheckoutFromExpiredCreditCard
 	cashier _ self createCashierWithItemPriced: 10.
 	
 	self
-		should: [ cashier cash: cart using: creditCard ]
+		should: [ cashier checkout: cart using: creditCard ]
 		raise: Error - MessageNotUnderstood
 		withMessage: Cashier canNotCheckoutWithExpiredCreditCardErrorMessage.! !
 
@@ -301,8 +301,8 @@ assertCreditCardIsNotExpired: aCreditCard
 
 	aCreditCard isExpired ifTrue: [ self error: self class canNotCheckoutWithExpiredCreditCardErrorMessage ].! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 16:42:08'!
-cash: aCart using: aCreditCard
+!Cashier methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:24:34'!
+checkout: aCart using: aCreditCard
 
 	| total |
 	
