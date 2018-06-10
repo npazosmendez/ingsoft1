@@ -155,8 +155,8 @@ TusLibrosTest subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:09:32'!
-test01CashierCanNotCashEmptyCart
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:16:07'!
+test01CashierCanNotCheckoutEmptyCart
 
 	| cart cashier creditCard |
 
@@ -170,8 +170,8 @@ test01CashierCanNotCashEmptyCart
 		withMessage: Cashier canNotCheckoutEmptyCartErrorMessage.
 		! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:08:02'!
-test02CashierCashesCartWithItemsAndReturnsBill
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:16:22'!
+test02CashierCheckoutsCartWithItemsAndReturnsBill
 
 	| bill cart cashier creditCard |
 	
@@ -183,8 +183,8 @@ test02CashierCashesCartWithItemsAndReturnsBill
 	
 	self assert: bill equals: 10.! !
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:09:15'!
-test03CashierCanNotCashFromExpiredCreditCard
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 17:16:27'!
+test03CashierCanNotCheckoutFromExpiredCreditCard
 
 	| cart cashier creditCard |
 	
