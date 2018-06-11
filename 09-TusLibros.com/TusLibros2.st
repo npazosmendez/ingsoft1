@@ -20,20 +20,21 @@ createCartWithItem
 	
 	^cart! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/10/2018 17:06:43'!
-createCashierWithItemPriced: aPrice
-
-	| priceTable |
-
-	priceTable _ Dictionary new.
-	priceTable add: self itemSellByTheStore -> 10.
+!TusLibrosTest methodsFor: 'support' stamp: 'np 6/11/2018 00:48:03'!
+createCartWithItemPriced: aPrice
 	
-	^Cashier with: priceTable.! !
+	| cart catalog |
+	
+	catalog _ Dictionary with: self itemSellByTheStore->aPrice.
+	cart _ Cart acceptingItemsOf: catalog.
+	cart add: self itemSellByTheStore.
+	
+	^cart! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'DR 6/7/2018 19:42:52'!
+!TusLibrosTest methodsFor: 'support' stamp: 'np 6/11/2018 00:53:04'!
 defaultCatalog
 	
-	^ Array with: self itemSellByTheStore! !
+	^ Dictionary with: (self itemSellByTheStore)->10! !
 
 !TusLibrosTest methodsFor: 'support' stamp: 'DR 6/7/2018 19:43:00'!
 itemNotSellByTheStore
@@ -52,6 +53,11 @@ should: aBlock raise: anExceptonHandlingCondition withMessage: anErrorMessage
 		should: aBlock
 		raise: anExceptonHandlingCondition
 		withExceptionDo: [ :anError | self assert: anError messageText equals: anErrorMessage ]! !
+
+!TusLibrosTest methodsFor: 'support' stamp: 'np 6/11/2018 00:28:24'!
+unexpiredCreditCard
+
+	^CreditCard withExpirationDate: FixedGregorianDate tomorrow.! !
 
 
 !classDefinition: #CartTest category: #TusLibros!
@@ -147,6 +153,20 @@ test08CartRemembersTheNumberOfAddedItems
 	cart add: 2 of: self itemSellByTheStore.
 	self assert: (cart occurrencesOf: self itemSellByTheStore) = 2! !
 
+!CartTest methodsFor: 'tests' stamp: 'np 6/11/2018 00:17:54'!
+test09EmptyCartTotalCostIsZero
+
+	self assert: self createCart totalCost  equals: 0.! !
+
+!CartTest methodsFor: 'tests' stamp: 'np 6/11/2018 00:49:17'!
+test10NonEmptyCartComputesTotalCost
+	
+	| cart |
+	
+	cart _ self createCartWithItemPriced: 63.
+	
+	self assert: cart totalCost  equals: 63.! !
+
 
 !classDefinition: #CashierTest category: #TusLibros!
 TusLibrosTest subclass: #CashierTest
@@ -155,45 +175,45 @@ TusLibrosTest subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'tests' stamp: 'DR 6/10/2018 17:24:54'!
+!CashierTest methodsFor: 'tests' stamp: 'np 6/11/2018 00:52:00'!
 test01CashierCanNotCheckoutEmptyCart
 
 	| cart cashier creditCard |
 
 	cart _ self createCart.
-	creditCard _ CreditCard withExpirationDate: FixedGregorianDate tomorrow.
-	cashier _ Cashier new.
+	creditCard _ self unexpiredCreditCard.
+	cashier _ Cashier for: cart.
 	
 	self
-		should: [ cashier checkout: cart using: creditCard ]
+		should: [ cashier chargeTo: creditCard ]
 		raise: Error - MessageNotUnderstood
 		withMessage: Cashier canNotCheckoutEmptyCartErrorMessage.
 		! !
 
-!CashierTest methodsFor: 'tests' stamp: 'DR 6/10/2018 17:32:52'!
+!CashierTest methodsFor: 'tests' stamp: 'np 6/11/2018 00:53:14'!
 test02CashierCheckoutsCartWithItemsAndReturnsBill
 
 	| bill cart cashier creditCard |
 	
-	cart _ self createCartWithItem.
-	creditCard _ CreditCard withExpirationDate: FixedGregorianDate tomorrow.
-	cashier _ self createCashierWithItemPriced: 10.
+	cart _ self createCartWithItemPriced: 10.
+	creditCard _ self unexpiredCreditCard.
+	cashier _ Cashier for: cart.
 		
-	bill _ cashier checkout: cart using: creditCard.
+	bill _ cashier chargeTo: creditCard.
 	
 	self assert: bill equals: 10.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'DR 6/10/2018 17:32:12'!
+!CashierTest methodsFor: 'tests' stamp: 'np 6/11/2018 01:03:43'!
 test03CashierCanNotCheckoutFromExpiredCreditCard
 
-	| cart cashier creditCard |
+	| cart cashier expiredCreditCard |
 	
 	cart _ self createCartWithItem.
-	creditCard _ CreditCard withExpirationDate: FixedGregorianDate yesterday.
-	cashier _ Cashier new.
+	expiredCreditCard _ CreditCard withExpirationDate: FixedGregorianDate yesterday.
+	cashier _ Cashier for: cart.
 	
 	self
-		should: [ cashier checkout: cart using: creditCard ]
+		should: [ cashier chargeTo: expiredCreditCard ]
 		raise: Error - MessageNotUnderstood
 		withMessage: Cashier canNotCheckoutWithExpiredCreditCardErrorMessage.! !
 
@@ -216,10 +236,10 @@ invalidQuantityErrorMessage
 	^'Invalid number of items'! !
 
 
-!Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 17:51'!
+!Cart methodsFor: 'assertions' stamp: 'np 6/11/2018 00:04:16'!
 assertIsValidItem: anItem
 
-	(catalog includes: anItem) ifFalse: [ self error: self invalidItemErrorMessage ]! !
+	(catalog includesKey: anItem) ifFalse: [ self error: self invalidItemErrorMessage ]! !
 
 !Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 17:51'!
 assertIsValidQuantity: aQuantity
@@ -265,9 +285,10 @@ add: aQuantity of: anItem
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
 
 
-!Cart methodsFor: 'cost' stamp: 'DR 6/10/2018 17:30:40'!
-costFrom: aPriceTable
-	^ items inject: 0 into: [ :acc :item | acc + aPriceTable at: item ].! !
+!Cart methodsFor: 'cost' stamp: 'np 6/11/2018 00:56:18'!
+totalCost
+
+	^ items inject: 0 into: [ :total :item | total + catalog at: item ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -283,7 +304,7 @@ acceptingItemsOf: aCatalog
 
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
-	instanceVariableNames: 'priceTable'
+	instanceVariableNames: 'cart'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -299,21 +320,21 @@ assertCreditCardIsNotExpired: aCreditCard
 	aCreditCard isExpired ifTrue: [ self error: self class canNotCheckoutWithExpiredCreditCardErrorMessage ].! !
 
 
-!Cashier methodsFor: 'initialization' stamp: 'DR 6/10/2018 16:42:02'!
-initializeWith: aPriceTable 
+!Cashier methodsFor: 'initialization' stamp: 'np 6/11/2018 01:04:34'!
+initializeFor: aCart 
 
-	priceTable _ aPriceTable.! !
+	cart _ aCart.! !
 
 
-!Cashier methodsFor: 'checkout' stamp: 'DR 6/10/2018 17:24:34'!
-checkout: aCart using: aCreditCard
+!Cashier methodsFor: 'checkout' stamp: 'np 6/11/2018 00:40:26'!
+chargeTo: aCreditCard
 
 	| total |
 	
-	self assertCartIsNotEmpty: aCart.
+	self assertCartIsNotEmpty: cart.
 	self assertCreditCardIsNotExpired: aCreditCard.
 	
-	total _ aCart costFrom: priceTable.
+	total _ cart totalCost.
 	
 	self debit: total from: aCreditCard.
 	
@@ -339,10 +360,10 @@ canNotCheckoutWithExpiredCreditCardErrorMessage
 
 	^'Can not cash with expired credit card'! !
 
-!Cashier class methodsFor: 'as yet unclassified' stamp: 'DR 6/10/2018 16:43:21'!
-with: aPriceTable
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'np 6/11/2018 01:04:28'!
+for: aCart
 
-	^self new initializeWith: aPriceTable.! !
+	^self new initializeFor: aCart! !
 
 
 !classDefinition: #CreditCard category: #TusLibros!
