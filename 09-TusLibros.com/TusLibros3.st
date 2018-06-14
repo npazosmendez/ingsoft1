@@ -105,7 +105,7 @@ TestCase subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'tests' stamp: 'DR 6/12/2018 21:40:44'!
+!CashierTest methodsFor: 'tests' stamp: 'np 6/14/2018 14:22:51'!
 test01CheckoutDebitsFromCreditCardAndReturnsAmmount
 
 	| cart cashier usedMerchantProcessor |
@@ -116,7 +116,11 @@ test01CheckoutDebitsFromCreditCardAndReturnsAmmount
 	usedMerchantProcessor _ false.
 	debitFromClosure _ [ usedMerchantProcessor _ true ].
 	
-	cashier :=  Cashier toCheckout: cart charging: testObjectsFactory notExpiredCreditCard using: self on: testObjectsFactory today registeringOn: OrderedCollection new.
+	cashier :=  Cashier 
+					toCheckout: cart 
+					charging: testObjectsFactory notExpiredCreditCard 
+					using: self on: testObjectsFactory today 
+					registeringOn: OrderedCollection new.
 	
 	self assert: cashier checkOut = (testObjectsFactory itemSellByTheStorePrice * 2).
 	self assert: usedMerchantProcessor.! !
@@ -156,7 +160,7 @@ test03CanNotCheckoutAnEmptyCart
 		raisesErrorWithMessage: Cashier cartCanNotBeEmptyErrorMessage
 		andLeavesEmpty: salesBook.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'DR 6/12/2018 22:31:19'!
+!CashierTest methodsFor: 'tests' stamp: 'np 6/14/2018 14:23:28'!
 test04CanNotCheckoutWithAnExpiredCreditCart
 
 	| salesBook |
@@ -164,7 +168,10 @@ test04CanNotCheckoutWithAnExpiredCreditCart
 	salesBook := OrderedCollection new.
 	
 	self
-		assert: [ testObjectsFactory cashierForSingleItemCartCharging: testObjectsFactory expiredCreditCard using: self registeringOn: salesBook ]
+		assert: [ testObjectsFactory 
+					cashierForSingleItemCartCharging: testObjectsFactory expiredCreditCard 
+					using: self 
+					registeringOn: salesBook ]
 		raisesErrorWithMessage: Cashier canNotChargeAnExpiredCreditCardErrorMessage
 		andLeavesEmpty: salesBook.! !
 
@@ -178,7 +185,7 @@ test06CanNotCheckoutWithInsufficientFunds
 
 	self assertsCashierDoesNotCheckoutWhenMerchantProcessorRaisesErrorWithMessage: self insufficientFundsErrorMessage.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'DR 6/12/2018 22:32:16'!
+!CashierTest methodsFor: 'tests' stamp: 'np 6/14/2018 14:23:53'!
 test07CashierDoesNotCallMerchantProcessorWhenCreditCardIsExpired
 
 	| salesBook usedMerchantProcessor creditCard|
@@ -190,7 +197,9 @@ test07CashierDoesNotCallMerchantProcessorWhenCreditCardIsExpired
 	creditCard _ testObjectsFactory expiredCreditCard.
 
 	self
-		should: [ testObjectsFactory cashierForSingleItemCartCharging: creditCard using: self registeringOn: salesBook. ]
+		should: [ testObjectsFactory 
+						cashierForSingleItemCartCharging: creditCard 
+						using: self registeringOn: salesBook. ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError | 
 			self deny: usedMerchantProcessor.]
