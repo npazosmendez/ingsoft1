@@ -246,101 +246,240 @@ debit: anAmount from: aCreditCard
 	^debitBehavior value: anAmount value: aCreditCard ! !
 
 
-!classDefinition: #ClientInterfaceTest category: #TusLibros!
-TestCase subclass: #ClientInterfaceTest
-	instanceVariableNames: 'authenticateBehaviour factory'
+!classDefinition: #TusLibrosSystemTest category: #TusLibros!
+TestCase subclass: #TusLibrosSystemTest
+	instanceVariableNames: 'testObjectsFactory'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 20:36:17'!
-authenticate: aUsername using: aPassword
-
-	authenticateBehaviour value.! !
-
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:11:52'!
-cartFor: aClientInterface
-	^aClientInterface createCartFor: nil with: nil.! !
-
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:09:37'!
-setUp
-	factory _ StoreTestObjectsFactory new.! !
-
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:03:28'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:46:02'!
 test01CanCreateCartOnSuccesfulAuthentication
+	| tusLibros |
 	
-	| clientInterface aPassword aUsername |
-	
-	authenticateBehaviour _ [ ].
-	
-	clientInterface _ ClientInterface consulting: self.
-	aUsername _ 'Jorge'.
-	aPassword _ 1234.
-	
-	self
-		shouldnt: [clientInterface createCartFor: aUsername with: aPassword.]
-		raise: Error.! !
+	tusLibros _ self createTusLibrosSystem.
 
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:03:44'!
+	self shouldnt: [ self createCartForTheUserIn: tusLibros ] raise: Error.! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:48:32'!
 test02CanNotCreateCartOnFailedAuthentication
-	
-	| clientInterface aPassword aUsername |
-	
-	authenticateBehaviour _ [ self error: 'Sos falso.' ].
-	
-	clientInterface _ ClientInterface consulting: self.
-	aUsername _ 'Jorge'.
-	aPassword _ 1234.
+	| tusLibros |
+
+	tusLibros _ self createTusLibrosSystem.
 	
 	self
-		should: [clientInterface createCartFor: aUsername with: aPassword.]
+		should: [
+			tusLibros
+				createCartFor: self aUserNotRegisteredOnTusLibros
+				with: self thePasswordOfTheUserOfTusLibros]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-				self assert: anError messageText = 'Sos falso.'
-			] ! !
+			self assert: anError messageText = TusLibrosSystem failedToAuthenticateClientMessageError].! !
 
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:04:02'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 02:59:32'!
 test03CanNotListUnexistantCart
-	
-	| clientInterface cartId |
-	
-	clientInterface _ ClientInterface consulting: self.
+	| cartId tusLibros |
+
+	tusLibros _ self createTusLibrosSystem.
 	cartId _ 0.
 	
 	self
-		should: [clientInterface listCart: cartId.]
+		should: [ tusLibros listCart: cartId ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-				self assert: anError messageText = ClientInterface unexistingCartErrorMessage.
-			] ! !
+			self assert: anError messageText = TusLibrosSystem unexistingCartErrorMessage ].! !
 
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:11:25'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:46:27'!
 test04NewCartListIsEmpty
+	| tusLibros cartId  |
 	
-	| clientInterface cartId |
+	tusLibros _ self createTusLibrosSystem.
 	
-	clientInterface _ ClientInterface consulting: self.
-	cartId _ self cartFor: clientInterface.
+	cartId _ self createCartForTheUserIn: tusLibros.
 	
-	self assert: ((clientInterface listCart: cartId) isEmpty).! !
+	self assert: (tusLibros listCart: cartId) isEmpty.! !
 
-!ClientInterfaceTest methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:12:36'!
-test05
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:46:40'!
+test05ProductsAddedToTheCartAreListed
+	| tusLibros cartId  aQuantity booksInCart |
 	
-	| clientInterface cartId aQuantity anISBN booksInCart |
+	tusLibros _ self createTusLibrosSystem.
 	
-	clientInterface _ ClientInterface consulting: self.
-	cartId _ self cartFor: clientInterface.
-
-	anISBN _ 128930.	
-	aQuantity _ 3.
+	cartId _ self createCartForTheUserIn: tusLibros.
 	
-	clientInterface add: aQuantity of: anISBN to: cartId.
+	aQuantity _ 5.
+	tusLibros add: aQuantity of: testObjectsFactory itemSellByTheStore to: cartId .
 	
-	booksInCart _ clientInterface listCart: cartId.
+	booksInCart  _ tusLibros listCart: cartId .
 	
 	self assert: booksInCart size equals: aQuantity.
-	self assert: (booksInCart occurrencesOf: anISBN) equals: aQuantity.! !
+	self assert: (booksInCart occurrencesOf: testObjectsFactory itemSellByTheStore) equals: aQuantity.! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:33:26'!
+test06CanNotAddProductsToUnexistantCart
+	| tusLibros cartId  |
+
+	tusLibros _ self createTusLibrosSystem .
+	
+	cartId _ 846455.
+	
+	self 
+		should: [tusLibros add: 3 of: testObjectsFactory itemSellByTheStore to: cartId ]
+		raise: Error -  MessageNotUnderstood 
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: TusLibrosSystem unexistingCartErrorMessage.
+		].
+! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:47:10'!
+test07CanCreateMoreThanOneEmptyCart
+	| tusLibros  aCartID anotherCartID |
+	
+	tusLibros _ self createTusLibrosSystem .
+	
+	aCartID _ self createCartForTheUserIn: tusLibros.
+	anotherCartID _ self createCartForTheUserIn: tusLibros.
+	
+	self deny: aCartID = anotherCartID.
+	self assert: (tusLibros listCart: aCartID) isEmpty.
+	self assert: (tusLibros listCart: anotherCartID) isEmpty.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:09:48'!
+test08CanAddProductsToDifferentCarts
+	| tusLibros  aCartID anotherCartID |
+	
+	tusLibros _ self createTusLibrosSystem.
+	
+	aCartID _	self createCartForTheUserIn: tusLibros.		
+	anotherCartID _ self createCartForTheUserIn: tusLibros.
+	
+	tusLibros add: 3 of: testObjectsFactory itemSellByTheStore to: aCartID.
+	tusLibros add: 5 of: testObjectsFactory itemSellByTheStore to: anotherCartID.
+	
+	self assert: (tusLibros listCart: aCartID) size equals: 3.
+	self 
+		assert: ((tusLibros listCart: aCartID) occurrencesOf: testObjectsFactory itemSellByTheStore) 
+		equals: 3.
+	
+	self assert: (tusLibros listCart: anotherCartID) size equals: 5.
+	self 
+		assert: ((tusLibros listCart: anotherCartID) occurrencesOf: testObjectsFactory itemSellByTheStore)
+		equals: 5.! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:36:23'!
+test09
+	| tusLibros clientsIDsAndPasswords aPassword  aClientID anotherClientID anotherPassword aCartID anotherCartID |
+	
+	aClientID _ 'Jorge'.
+	aPassword _ 1234.
+	anotherClientID _ 'Emilio'.
+	anotherPassword _ 5678.
+	
+	clientsIDsAndPasswords _ Dictionary with: aClientID->aPassword with: anotherClientID->anotherPassword.
+	
+	tusLibros _ TusLibrosSystem
+		acceptingItems: testObjectsFactory defaultCatalog 
+		authenticatingWith: clientsIDsAndPasswords.
+	
+	aCartID _ tusLibros createCartFor: aClientID with: aPassword .
+	anotherCartID _ tusLibros createCartFor: anotherClientID with: anotherPassword.
+	
+	tusLibros add: 3 of: testObjectsFactory itemSellByTheStore to: aCartID.
+	tusLibros add: 5 of: testObjectsFactory itemSellByTheStore to: anotherCartID.
+	
+	self assert: (tusLibros listCart: aCartID) size equals: 3.
+	self 
+		assert: ((tusLibros listCart: aCartID) occurrencesOf: testObjectsFactory itemSellByTheStore) 
+		equals: 3.
+	
+	self assert: (tusLibros listCart: anotherCartID) size equals: 5.
+	self 
+		assert: ((tusLibros listCart: anotherCartID) occurrencesOf: testObjectsFactory itemSellByTheStore)
+		equals: 5.! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:38:42'!
+test10CanNotCheckOutUnexistantCart
+	| tusLibros cartId  creditCardNumber aMonthOfAnYear |
+
+	creditCardNumber _ 123465756454.
+	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture .
+	
+	tusLibros _ self createTusLibrosSystem.
+	cartId _ 0.
+		
+	self 
+		should: [
+			tusLibros 
+				checkOut: cartId 
+				chargingOn: creditCardNumber
+				expiringOn: aMonthOfAnYear
+				ownedBy: 'José Luis Miguel'
+				]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: TusLibrosSystem unexistingCartErrorMessage 
+			]! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:39:24'!
+test11CanNotCheckOutEmptyCart
+	| tusLibros cartId  creditCardNumber aMonthOfAnYear |
+
+	creditCardNumber _ 123465756454.
+	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture .
+	
+	tusLibros _ self createTusLibrosSystem.
+	cartId _ self createCartForTheUserIn: tusLibros.
+	
+	self 
+		should: [
+			tusLibros 
+				checkOut: cartId 
+				chargingOn: creditCardNumber
+				expiringOn: aMonthOfAnYear
+				ownedBy: 'José Luis Miguel'
+				]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: Cashier cartCanNotBeEmptyErrorMessage
+			]! !
+
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:56:09'!
+aUserNotRegisteredOnTusLibros
+	^'Emilio'! !
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:54:55'!
+aUserRegisteredOnTusLibros
+	^'Jorge'! !
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:06:29'!
+createCartForTheUserIn: tusLibrosSystem
+
+	^tusLibrosSystem
+		createCartFor: self aUserRegisteredOnTusLibros 
+		with: self thePasswordOfTheUserOfTusLibros .! !
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:59:19'!
+createTusLibrosSystem
+
+	^TusLibrosSystem 
+		acceptingItems: testObjectsFactory defaultCatalog 
+		authenticatingWith: self defaultUsersAndPasswords! !
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:01:07'!
+defaultUsersAndPasswords
+	
+	^Dictionary with: (self aUserRegisteredOnTusLibros)->(self thePasswordOfTheUserOfTusLibros).! !
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:30:25'!
+setUp
+	testObjectsFactory := StoreTestObjectsFactory new.
+! !
+
+!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:00:59'!
+thePasswordOfTheUserOfTusLibros
+	^1234! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -383,6 +522,11 @@ initializeAcceptingItemsOf: aCatalog
 occurrencesOf: anItem
 
 	^items occurrencesOf: anItem  ! !
+
+!Cart methodsFor: 'queries' stamp: 'np 6/16/2018 02:44:44'!
+products
+
+	^items copy! !
 
 
 !Cart methodsFor: 'testing' stamp: 'HernanWilkinson 6/17/2013 17:44'!
@@ -518,58 +662,9 @@ creditCardHasNoCreditErrorMessage
 	^'Credit card has no credit'! !
 
 
-!classDefinition: #ClientInterface category: #TusLibros!
-Object subclass: #ClientInterface
-	instanceVariableNames: 'authenticator cartIds books'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TusLibros'!
-
-!ClientInterface methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:01:07'!
-add: aQuantity of: anISBN to: aCartId
-	books add: anISBN withOccurrences: aQuantity.! !
-
-!ClientInterface methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 20:52:49'!
-createCartFor: aUsername with: aPassword
-	| cartId |
-	
-	authenticator authenticate: aUsername using: aPassword .
-	cartId _ 0.
-	cartIds add: cartId.
-	^ cartId! !
-
-!ClientInterface methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:01:34'!
-initializeWith: anAuthenticator
-	authenticator _ anAuthenticator.
-	cartIds  _ Set new.
-	books _ Bag new.! !
-
-!ClientInterface methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 21:02:05'!
-listCart: aCartId
-
-	(cartIds includes: aCartId)
-		ifFalse: [self error: self class unexistingCartErrorMessage.].
-	^books.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'ClientInterface class' category: #TusLibros!
-ClientInterface class
-	instanceVariableNames: ''!
-
-!ClientInterface class methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 20:32:32'!
-consulting: anAuthenticator
-	^self new initializeWith: anAuthenticator
-! !
-
-!ClientInterface class methodsFor: 'as yet unclassified' stamp: 'DR 6/14/2018 20:44:47'!
-unexistingCartErrorMessage
-	^'No existe tu carro'! !
-
-
 !classDefinition: #CreditCard category: #TusLibros!
 Object subclass: #CreditCard
-	instanceVariableNames: 'expiration'
+	instanceVariableNames: 'expiration number owner'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -580,10 +675,12 @@ isExpiredOn: aDate
 	^expiration start < (Month month: aDate monthIndex year: aDate yearNumber) start ! !
 
 
-!CreditCard methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:38'!
-initializeExpiringOn: aMonth 
-	
-	expiration := aMonth ! !
+!CreditCard methodsFor: 'initialization' stamp: 'np 6/16/2018 02:42:26'!
+initializeWith: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner 	
+
+	expiration := aMonthOfAnYear.
+	number _ aCreditCardNumber .
+	owner _ aCreditCardOwner .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -591,10 +688,10 @@ initializeExpiringOn: aMonth
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'HernanWilkinson 6/17/2013 18:38'!
-expiringOn: aMonth 
+!CreditCard class methodsFor: 'instance creation' stamp: 'np 6/16/2018 02:42:08'!
+with: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner
 	
-	^self new initializeExpiringOn: aMonth! !
+	^self new initializeWith: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner ! !
 
 
 !classDefinition: #Sale category: #TusLibros!
@@ -664,15 +761,26 @@ defaultCatalog
 		yourself ! !
 
 
-!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:37'!
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'np 6/16/2018 03:28:52'!
+aMonthOfTheFuture
+
+	^Month month: today monthIndex year: today yearNumber + 1! !
+
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'np 6/16/2018 03:26:41'!
 expiredCreditCard
 	
-	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber - 1)! !
+	^CreditCard 
+		with: 12345
+		expiringOn: (Month month: today monthIndex year: today yearNumber - 1)
+		ownedBy: 'Marley'! !
 
-!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:36'!
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'np 6/16/2018 03:27:23'!
 notExpiredCreditCard
 	
-	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber + 1)! !
+	^CreditCard 
+		with: 1234
+		expiringOn: (Month month: today monthIndex year: today yearNumber + 1)
+		ownedBy: 'Noit'! !
 
 
 !StoreTestObjectsFactory methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:37'!
@@ -686,3 +794,102 @@ today
 	
 	^ today! !
 
+
+!classDefinition: #TusLibrosSystem category: #TusLibros!
+Object subclass: #TusLibrosSystem
+	instanceVariableNames: 'IDsAndPasswords lastCartID catalog cartsAndProducts merchantProcessor salesBook'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:45:57'!
+add: aQuantity of: anISBN to: aCartId
+	(cartsAndProducts
+		at: aCartId
+		ifAbsent: [ self error: self class unexistingCartErrorMessage ])
+		add: aQuantity
+		of: anISBN.! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 01:31:29'!
+authenticate: aClientID using: aPassword
+
+	(IDsAndPasswords at: aClientID ifAbsent: []) = aPassword 
+		ifFalse: [self error: self class failedToAuthenticateClientMessageError]
+	! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:22:36'!
+checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner 
+
+	| cart creditCard cashier |
+	
+	cart _ cartsAndProducts
+		at: aCartID
+		ifAbsent: [ self error: self class unexistingCartErrorMessage ].
+		
+	creditCard _ CreditCard 
+		with: aCreditCardNumber 
+		expiringOn: aMonthOfAnYear 
+		ownedBy: aCreditCardOwner.
+		
+	cashier _ Cashier
+		toCheckout: cart
+		charging: creditCard
+		throught: merchantProcessor
+		on: Date today
+		registeringOn: salesBook.
+		
+	cashier checkOut.
+	
+	^0
+
+	
+
+		! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:45:57'!
+createCartFor: aClientID with: aPassword
+	| cartId |
+	self
+		authenticate: aClientID
+		using: aPassword.
+	lastCartID _ lastCartID + 1.
+	cartId _ lastCartID.
+	cartsAndProducts
+		at: cartId
+		put: (Cart acceptingItemsOf: catalog).
+	^ cartId.! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:47:26'!
+initializeAcceptingItems: aCatalog authenticatingWith: clientIDsAndPasswords
+	IDsAndPasswords _ clientIDsAndPasswords.
+	lastCartID _ 0.
+	cartsAndProducts _ Dictionary new.
+	catalog _ aCatalog.! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:45:57'!
+listCart: aCartId
+	^ (cartsAndProducts
+		at: aCartId
+		ifAbsent: [ self error: self class unexistingCartErrorMessage ]) products.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TusLibrosSystem class' category: #TusLibros!
+TusLibrosSystem class
+	instanceVariableNames: ''!
+
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:48:04'!
+acceptingItems: aCatalog authenticatingWith: clientIDsAndPasswords
+
+	^self new initializeAcceptingItems: aCatalog authenticatingWith: clientIDsAndPasswords
+! !
+
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 01:09:46'!
+failedToAuthenticateClientMessageError
+
+	^'Usuario o contraseña inválidos.'! !
+
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 01:10:03'!
+unexistingCartErrorMessage
+
+	^'No existe un carro con ese ID'! !
