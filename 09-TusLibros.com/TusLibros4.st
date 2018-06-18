@@ -248,39 +248,56 @@ debit: anAmount from: aCreditCard
 
 !classDefinition: #TusLibrosSystemTest category: #TusLibros!
 TestCase subclass: #TusLibrosSystemTest
-	instanceVariableNames: 'testObjectsFactory'
+	instanceVariableNames: 'testObjectsFactory nowBehaviour'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:46:02'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 21:01:59'!
 test01CanCreateCartOnSuccesfulAuthentication
 	| tusLibros |
 	
-	tusLibros _ self createTusLibrosSystem.
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	self
+		shouldnt: [ self emptyCartIn: tusLibros ]
+		raise: Error - MessageNotUnderstood.! !
 
-	self shouldnt: [ self createCartForTheUserIn: tusLibros ] raise: Error.! !
-
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:48:32'!
-test02CanNotCreateCartOnFailedAuthentication
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 21:02:25'!
+test02UnregisteredUserCanNotCreateCart
 	| tusLibros |
-
-	tusLibros _ self createTusLibrosSystem.
+	
+	tusLibros _ self defaultTusLibrosSystem.
 	
 	self
 		should: [
 			tusLibros
 				createCartFor: self aUserNotRegisteredOnTusLibros
-				with: self thePasswordOfTheUserOfTusLibros]
+				with: self dummyPassword ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = TusLibrosSystem failedToAuthenticateClientMessageError].! !
+			self assert: anError messageText = TusLibrosSystem failedToAuthenticateClientMessageError ].! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 02:59:32'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 21:02:44'!
+test02bRegisteredUserWithIncorrentPasswordCanNotCreateCart
+	| tusLibros |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	self
+		should: [
+			tusLibros
+				createCartFor: self aUserRegisteredOnTusLibros
+				with: 'Wrong password' ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = TusLibrosSystem failedToAuthenticateClientMessageError ].! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 21:02:52'!
 test03CanNotListUnexistantCart
 	| cartId tusLibros |
-
-	tusLibros _ self createTusLibrosSystem.
+	
+	tusLibros _ self defaultTusLibrosSystem.
 	cartId _ 0.
 	
 	self
@@ -289,86 +306,87 @@ test03CanNotListUnexistantCart
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = TusLibrosSystem unexistingCartErrorMessage ].! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:46:27'!
-test04NewCartListIsEmpty
-	| tusLibros cartId  |
-	
-	tusLibros _ self createTusLibrosSystem.
-	
-	cartId _ self createCartForTheUserIn: tusLibros.
-	
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 15:35:06'!
+test03bCanNotAddBooksToUnexistantCart
+	| tusLibros cartId |
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ 846455.
+	self
+		should: [
+			tusLibros
+				add: 3
+				of: testObjectsFactory itemSellByTheStore
+				to: cartId ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self
+				assert: anError messageText
+				equals: TusLibrosSystem unexistingCartErrorMessage ].! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:19'!
+test04BookListOfNewCartIsEmpty
+	| tusLibros cartId |
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self emptyCartIn: tusLibros.
 	self assert: (tusLibros listCart: cartId) isEmpty.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:46:40'!
-test05ProductsAddedToTheCartAreListed
-	| tusLibros cartId  aQuantity booksInCart |
-	
-	tusLibros _ self createTusLibrosSystem.
-	
-	cartId _ self createCartForTheUserIn: tusLibros.
-	
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:19'!
+test05BooksAddedToTheCartAreListed
+	| tusLibros cartId aQuantity booksInCart |
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self emptyCartIn: tusLibros.
 	aQuantity _ 5.
-	tusLibros add: aQuantity of: testObjectsFactory itemSellByTheStore to: cartId .
-	
-	booksInCart  _ tusLibros listCart: cartId .
-	
-	self assert: booksInCart size equals: aQuantity.
-	self assert: (booksInCart occurrencesOf: testObjectsFactory itemSellByTheStore) equals: aQuantity.! !
+	tusLibros
+		add: aQuantity
+		of: testObjectsFactory itemSellByTheStore
+		to: cartId.
+	booksInCart _ tusLibros listCart: cartId.
+	self
+		assert: booksInCart size
+		equals: aQuantity.
+	self
+		assert: (booksInCart occurrencesOf: testObjectsFactory itemSellByTheStore)
+		equals: aQuantity.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:33:26'!
-test06CanNotAddProductsToUnexistantCart
-	| tusLibros cartId  |
-
-	tusLibros _ self createTusLibrosSystem .
-	
-	cartId _ 846455.
-	
-	self 
-		should: [tusLibros add: 3 of: testObjectsFactory itemSellByTheStore to: cartId ]
-		raise: Error -  MessageNotUnderstood 
-		withExceptionDo: [ :anError |
-			self assert: anError messageText equals: TusLibrosSystem unexistingCartErrorMessage.
-		].
-! !
-
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:47:10'!
-test07CanCreateMoreThanOneEmptyCart
-	| tusLibros  aCartID anotherCartID |
-	
-	tusLibros _ self createTusLibrosSystem .
-	
-	aCartID _ self createCartForTheUserIn: tusLibros.
-	anotherCartID _ self createCartForTheUserIn: tusLibros.
-	
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:19'!
+test07AUserCanCreateMoreThanOneEmptyCart
+	| tusLibros aCartID anotherCartID |
+	tusLibros _ self defaultTusLibrosSystem.
+	aCartID _ self emptyCartIn: tusLibros.
+	anotherCartID _ self emptyCartIn: tusLibros.
 	self deny: aCartID = anotherCartID.
 	self assert: (tusLibros listCart: aCartID) isEmpty.
-	self assert: (tusLibros listCart: anotherCartID) isEmpty.
-	! !
+	self assert: (tusLibros listCart: anotherCartID) isEmpty.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:09:48'!
-test08CanAddProductsToDifferentCarts
-	| tusLibros  aCartID anotherCartID |
-	
-	tusLibros _ self createTusLibrosSystem.
-	
-	aCartID _	self createCartForTheUserIn: tusLibros.		
-	anotherCartID _ self createCartForTheUserIn: tusLibros.
-	
-	tusLibros add: 3 of: testObjectsFactory itemSellByTheStore to: aCartID.
-	tusLibros add: 5 of: testObjectsFactory itemSellByTheStore to: anotherCartID.
-	
-	self assert: (tusLibros listCart: aCartID) size equals: 3.
-	self 
-		assert: ((tusLibros listCart: aCartID) occurrencesOf: testObjectsFactory itemSellByTheStore) 
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:19'!
+test08BooksAddedToMultipleCartsByAUserGetListedInTheirRespectiveCarts
+	| tusLibros aCartID anotherCartID |
+	tusLibros _ self defaultTusLibrosSystem.
+	aCartID _ self emptyCartIn: tusLibros.
+	anotherCartID _ self emptyCartIn: tusLibros.
+	tusLibros
+		add: 3
+		of: testObjectsFactory itemSellByTheStore
+		to: aCartID.
+	tusLibros
+		add: 5
+		of: testObjectsFactory itemSellByTheStore
+		to: anotherCartID.
+	self
+		assert: (tusLibros listCart: aCartID) size
 		equals: 3.
-	
-	self assert: (tusLibros listCart: anotherCartID) size equals: 5.
-	self 
+	self
+		assert: ((tusLibros listCart: aCartID) occurrencesOf: testObjectsFactory itemSellByTheStore)
+		equals: 3.
+	self
+		assert: (tusLibros listCart: anotherCartID) size
+		equals: 5.
+	self
 		assert: ((tusLibros listCart: anotherCartID) occurrencesOf: testObjectsFactory itemSellByTheStore)
 		equals: 5.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:36:23'!
-test09
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 21:48:18'!
+test09BooksAddedByMultipleUsersGetListedInTheirRespectiveCarts
 	| tusLibros clientsIDsAndPasswords aPassword  aClientID anotherClientID anotherPassword aCartID anotherCartID |
 	
 	aClientID _ 'Jorge'.
@@ -380,7 +398,9 @@ test09
 	
 	tusLibros _ TusLibrosSystem
 		acceptingItems: testObjectsFactory defaultCatalog 
-		authenticatingWith: clientsIDsAndPasswords.
+		chargingWith: self
+		authenticatingWith: clientsIDsAndPasswords
+		timingWith: self.
 	
 	aCartID _ tusLibros createCartFor: aClientID with: aPassword .
 	anotherCartID _ tusLibros createCartFor: anotherClientID with: anotherPassword.
@@ -398,86 +418,391 @@ test09
 		assert: ((tusLibros listCart: anotherCartID) occurrencesOf: testObjectsFactory itemSellByTheStore)
 		equals: 5.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:38:42'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:37'!
 test10CanNotCheckOutUnexistantCart
-	| tusLibros cartId  creditCardNumber aMonthOfAnYear |
-
-	creditCardNumber _ 123465756454.
-	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture .
+	| tusLibros cartId creditCardNumber aMonthOfAnYear |
 	
-	tusLibros _ self createTusLibrosSystem.
+	creditCardNumber _ 123465756454.
+	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture.
+	
+	tusLibros _ self defaultTusLibrosSystem.
 	cartId _ 0.
-		
-	self 
+	
+	self
 		should: [
-			tusLibros 
-				checkOut: cartId 
+			tusLibros
+				checkOut: cartId
 				chargingOn: creditCardNumber
 				expiringOn: aMonthOfAnYear
 				ownedBy: 'José Luis Miguel'
-				]
-		raise: Error - MessageNotUnderstood 
+				on: testObjectsFactory today. ]
+		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText equals: TusLibrosSystem unexistingCartErrorMessage 
-			]! !
+			self
+				assert: anError messageText
+				equals: TusLibrosSystem unexistingCartErrorMessage ].! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/16/2018 03:39:24'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:35'!
 test11CanNotCheckOutEmptyCart
-	| tusLibros cartId  creditCardNumber aMonthOfAnYear |
-
+	| tusLibros cartId creditCardNumber aMonthOfAnYear |
+	
 	creditCardNumber _ 123465756454.
-	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture .
+	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture.
 	
-	tusLibros _ self createTusLibrosSystem.
-	cartId _ self createCartForTheUserIn: tusLibros.
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self emptyCartIn: tusLibros.
 	
-	self 
+	self
 		should: [
-			tusLibros 
-				checkOut: cartId 
+			tusLibros
+				checkOut: cartId
 				chargingOn: creditCardNumber
 				expiringOn: aMonthOfAnYear
 				ownedBy: 'José Luis Miguel'
-				]
-		raise: Error - MessageNotUnderstood 
+				on: testObjectsFactory today ]
+		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: anError messageText equals: Cashier cartCanNotBeEmptyErrorMessage
-			]! !
+			self
+				assert: anError messageText
+				equals: Cashier cartCanNotBeEmptyErrorMessage ].! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 20:00:33'!
+test12CanCheckOutNonEmptyCart
+	| tusLibros cartId creditCardNumber aMonthOfAnYear |
+	
+	creditCardNumber _ 123465756454.
+	aMonthOfAnYear _ testObjectsFactory aMonthOfTheFuture.
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self cartWithItemsIn: tusLibros.
+	
+	self
+		shouldnt: [
+			tusLibros
+				checkOut: cartId
+				chargingOn: creditCardNumber
+				expiringOn: aMonthOfAnYear
+				ownedBy: 'José Luis Miguel'
+				on: testObjectsFactory today.
+			 ]
+		raise: Error - MessageNotUnderstood.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 19:58:44'!
+test13CanCheckOutCartWithUnexpiredCreditCardInThePast
+	| tusLibros cartId creditCardNumber expirationMonth |
+	
+	creditCardNumber _ 123465756454.
+	expirationMonth _ testObjectsFactory aMonthInThe1800s.
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self cartWithItemsIn: tusLibros.
+	
+	self
+		shouldnt: [
+			tusLibros
+				checkOut: cartId
+				chargingOn: creditCardNumber
+				expiringOn: expirationMonth
+				ownedBy: 'José Luis Miguel'
+				on: (DateAndTime year: 1800 day: 0).
+			 ]
+		raise: Error - MessageNotUnderstood.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 22:18:37'!
+test14PurchasesOfNewUserAreEmpty
+	| tusLibros purchases |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	purchases _ tusLibros
+		listPurchasesOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	
+	self assert: purchases isEmpty
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 22:19:50'!
+test15BooksOfASingleCheckoutCartAreListedInPurchases
+	| tusLibros cartId purchases |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self emptyCartIn: tusLibros.
+	
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+	
+	self successfulCheckoutOf: cartId in: tusLibros.
+	
+	purchases _ tusLibros
+		listPurchasesOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	
+	self assert: purchases size equals: 2.
+	self assert: (purchases occurrencesOf: testObjectsFactory itemSellByTheStore) equals: 2.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 22:19:36'!
+test16BooksOfMultipleCheckoutCartsAreListedInPurchases
+	| tusLibros cartId purchases |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self emptyCartIn: tusLibros.
+	
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+		
+	self successfulCheckoutOf: cartId in: tusLibros.
+	self successfulCheckoutOf: cartId in: tusLibros.
+	
+	purchases _ tusLibros
+		listPurchasesOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	
+	self assert: purchases size equals: 4.
+	self assert: (purchases occurrencesOf: testObjectsFactory itemSellByTheStore) equals: 4.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 22:20:34'!
+test17BooksBoughtByDifferentUsersGetListedInTheirRespectiveLists
+	| tusLibros firstCartId secondCartId firstPurchases secondPurchases |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+
+	firstCartId _ tusLibros
+		createCartFor: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	tusLibros add: 1 of: testObjectsFactory itemSellByTheStore to: firstCartId.
+	self successfulCheckoutOf: firstCartId in: tusLibros.
+	
+	secondCartId _ tusLibros
+		createCartFor: 'Marianuli'
+		with: 1111.
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: secondCartId.
+	self successfulCheckoutOf: secondCartId in: tusLibros.
+	
+	firstPurchases _ tusLibros
+		listPurchasesOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+
+	secondPurchases _ tusLibros
+		listPurchasesOf: 'Marianuli'
+		with: 1111.
+	
+	self assert: firstPurchases size equals: 1.
+	self assert: (firstPurchases occurrencesOf: testObjectsFactory itemSellByTheStore) equals: 1.
+
+	self assert: secondPurchases size equals: 2.
+	self assert: (secondPurchases occurrencesOf: testObjectsFactory itemSellByTheStore) equals: 2.
+
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:39:41'!
+test18ExpiredCartCanNotBeListed
+	| tusLibros cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	nowBehaviour _ [ self december31Of2003 ].
+	
+	cartId _ self emptyCartIn: tusLibros.
+
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 31) ].
+	
+	self 
+		should: [ tusLibros listCart: cartId. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = TusLibrosSystem expiredCartMessageError ].! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:40:01'!
+test19ExpiredCartCanNotBeAddedTo
+	| tusLibros cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	nowBehaviour _ [ self december31Of2003 ].
+	
+	cartId _ self emptyCartIn: tusLibros.
+
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 31) ].
+	
+	self 
+		should: [ tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = TusLibrosSystem expiredCartMessageError ].! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:40:12'!
+test20ExpiredCartCanNotBeCheckout
+	| tusLibros cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	nowBehaviour _ [ self december31Of2003 ].
+	
+	cartId _ self emptyCartIn: tusLibros.
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 31) ].
+	
+	self 
+		should: [
+			tusLibros
+				checkOut: cartId
+				chargingOn: self dummyCreditCardNumber
+				expiringOn: testObjectsFactory aMonthOfTheFuture
+				ownedBy: self dummyName
+				on: testObjectsFactory today. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = TusLibrosSystem expiredCartMessageError ].! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:41:11'!
+test21ListingCartExtendsItsExpirationDeadline
+	| tusLibros cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	nowBehaviour _ [ self december31Of2003 ].
+	
+	cartId _ self emptyCartIn: tusLibros.
+	
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 15) ].
+	
+	tusLibros listCart: cartId.
+
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 31) ].
+	
+	self 
+		shouldnt: [
+			tusLibros listCart: cartId. ]
+		raise: Error - MessageNotUnderstood! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:41:22'!
+test22AddingToCartExtendsItsExpirationDeadline
+	| tusLibros cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	nowBehaviour _ [ self december31Of2003 ].
+	
+	cartId _ self emptyCartIn: tusLibros.
+	
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 15) ].
+	
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 31) ].
+	
+	self 
+		shouldnt: [
+			tusLibros listCart: cartId. ]
+		raise: Error - MessageNotUnderstood! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:41:35'!
+test23CheckingOutCartExtendsItsExpirationDeadline
+	| tusLibros cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	nowBehaviour _ [ self december31Of2003 ].
+	
+	cartId _ self emptyCartIn: tusLibros.
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+		
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 15) ].
+	
+	self successfulCheckoutOf: cartId in: tusLibros.
+
+	nowBehaviour _ [ self december31Of2003 next: (TimeUnits minute with: 31) ].
+	
+	self 
+		shouldnt: [
+			tusLibros listCart: cartId. ]
+		raise: Error - MessageNotUnderstood! !
 
 
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:56:09'!
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/16/2018 02:56:09'!
 aUserNotRegisteredOnTusLibros
 	^'Emilio'! !
 
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:54:55'!
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/16/2018 02:54:55'!
 aUserRegisteredOnTusLibros
 	^'Jorge'! !
 
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:06:29'!
-createCartForTheUserIn: tusLibrosSystem
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:00:19'!
+cartWithItemsIn: tusLibros
+	| cartId |
+	cartId _ self emptyCartIn: tusLibros.
+	tusLibros
+		add: 2
+		of: testObjectsFactory itemSellByTheStore
+		to: cartId.
+	^ cartId.! !
 
-	^tusLibrosSystem
-		createCartFor: self aUserRegisteredOnTusLibros 
-		with: self thePasswordOfTheUserOfTusLibros .! !
-
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:59:19'!
-createTusLibrosSystem
-
-	^TusLibrosSystem 
-		acceptingItems: testObjectsFactory defaultCatalog 
-		authenticatingWith: self defaultUsersAndPasswords! !
-
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:01:07'!
-defaultUsersAndPasswords
-	
-	^Dictionary with: (self aUserRegisteredOnTusLibros)->(self thePasswordOfTheUserOfTusLibros).! !
-
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:30:25'!
-setUp
-	testObjectsFactory := StoreTestObjectsFactory new.
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 19:05:37'!
+debit: anAmount from: aCreditCard 
 ! !
 
-!TusLibrosSystemTest methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:00:59'!
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 22:09:47'!
+december31Of2003
+	^GregorianDateTime
+		date: (FixedGregorianDate yearNumber: 2003 monthNumber: 12 dayNumber: 31)
+		timeOfDay: (TimeOfDay  hours: 00)! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 21:48:06'!
+defaultTusLibrosSystem
+	^ TusLibrosSystem
+		acceptingItems: testObjectsFactory defaultCatalog
+		chargingWith: self
+		authenticatingWith: self defaultUsersAndPasswords
+		timingWith: self.! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:34:19'!
+defaultUsersAndPasswords
+	
+	^Dictionary
+		with: (self aUserRegisteredOnTusLibros)->(self thePasswordOfTheUserOfTusLibros)
+		with: 'Marianuli'->1111.! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:02:31'!
+dummyCreditCardNumber
+	^123465756454! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:01:17'!
+dummyName
+	^'José Luis Miguel'! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 15:17:11'!
+dummyPassword
+	^'pass'! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:00:19'!
+emptyCartIn: tusLibrosSystem
+	^ tusLibrosSystem
+		createCartFor: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 22:17:42'!
+now
+	^nowBehaviour value! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 22:16:07'!
+setUp
+	testObjectsFactory := StoreTestObjectsFactory new.
+	nowBehaviour _ [ self december31Of2003 ].
+! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:28:48'!
+successfulCheckoutOf: aCartId in: tusLibrosSystem
+	tusLibrosSystem
+		checkOut: aCartId
+		chargingOn: self dummyCreditCardNumber
+		expiringOn: testObjectsFactory aMonthOfTheFuture
+		ownedBy: self dummyName
+		on: testObjectsFactory today.! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/16/2018 03:00:59'!
 thePasswordOfTheUserOfTusLibros
 	^1234! !
 
@@ -761,6 +1086,11 @@ defaultCatalog
 		yourself ! !
 
 
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'DR 6/17/2018 19:47:18'!
+aMonthInThe1800s
+
+	^Month month: today monthIndex year: 1800! !
+
 !StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'np 6/16/2018 03:28:52'!
 aMonthOfTheFuture
 
@@ -797,34 +1127,40 @@ today
 
 !classDefinition: #TusLibrosSystem category: #TusLibros!
 Object subclass: #TusLibrosSystem
-	instanceVariableNames: 'IDsAndPasswords lastCartID catalog cartsAndProducts merchantProcessor salesBook'
+	instanceVariableNames: 'clientsInfo lastCartID catalog cartsAndProducts merchantProcessor purchasedBooks cartOwners clock cartLastTimeUsed'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:45:57'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 22:41:59'!
 add: aQuantity of: anISBN to: aCartId
-	(cartsAndProducts
-		at: aCartId
-		ifAbsent: [ self error: self class unexistingCartErrorMessage ])
+
+	(cartsAndProducts includesKey: aCartId)
+		ifFalse: [ self error: self class unexistingCartErrorMessage ].
+		
+	(clock now > ((cartLastTimeUsed at: aCartId) next: (TimeUnits minute with: 30)))
+		ifTrue: [self error: self class expiredCartMessageError].
+
+	cartLastTimeUsed at: aCartId put: clock now.
+		
+	(cartsAndProducts at: aCartId)
 		add: aQuantity
 		of: anISBN.! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 01:31:29'!
-authenticate: aClientID using: aPassword
-
-	(IDsAndPasswords at: aClientID ifAbsent: []) = aPassword 
-		ifFalse: [self error: self class failedToAuthenticateClientMessageError]
-	! !
-
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 03:22:36'!
-checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner 
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 22:43:07'!
+checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner on: aDate
 
 	| cart creditCard cashier |
 	
-	cart _ cartsAndProducts
-		at: aCartID
-		ifAbsent: [ self error: self class unexistingCartErrorMessage ].
+	(cartsAndProducts includesKey: aCartID)
+		ifFalse: [ self error: self class unexistingCartErrorMessage ].
+	
+	(clock now > ((cartLastTimeUsed at: aCartID) next: (TimeUnits minute with: 30)))
+		ifTrue: [self error: self class expiredCartMessageError].
+		
+	cartLastTimeUsed at: aCartID put: clock now.
+		
+	cart _ cartsAndProducts at: aCartID.
 		
 	creditCard _ CreditCard 
 		with: aCreditCardNumber 
@@ -835,42 +1171,96 @@ checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear owned
 		toCheckout: cart
 		charging: creditCard
 		throught: merchantProcessor
-		on: Date today
-		registeringOn: salesBook.
-		
-	cashier checkOut.
+		on: aDate
+		registeringOn: OrderedCollection new.
 	
-	^0
+	self registerPurchasedBooksOf: cart identifiedAs: aCartID.
+	
+	^cashier checkOut
 
 	
 
 		! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:45:57'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 21:58:02'!
 createCartFor: aClientID with: aPassword
 	| cartId |
 	self
 		authenticate: aClientID
 		using: aPassword.
+		
 	lastCartID _ lastCartID + 1.
 	cartId _ lastCartID.
+	
 	cartsAndProducts
 		at: cartId
 		put: (Cart acceptingItemsOf: catalog).
+	
+	cartOwners
+		at: cartId
+		put: aClientID.
+	
+	cartLastTimeUsed
+		at: cartId
+		put: clock now.
+		
 	^ cartId.! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:47:26'!
-initializeAcceptingItems: aCatalog authenticatingWith: clientIDsAndPasswords
-	IDsAndPasswords _ clientIDsAndPasswords.
-	lastCartID _ 0.
-	cartsAndProducts _ Dictionary new.
-	catalog _ aCatalog.! !
-
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:45:57'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 22:41:21'!
 listCart: aCartId
-	^ (cartsAndProducts
-		at: aCartId
-		ifAbsent: [ self error: self class unexistingCartErrorMessage ]) products.! !
+
+	(cartsAndProducts includesKey: aCartId)
+		ifFalse: [ self error: self class unexistingCartErrorMessage ].
+
+	(clock now > ((cartLastTimeUsed at: aCartId) next: (TimeUnits minute with: 30)))
+		ifTrue: [self error: self class expiredCartMessageError].
+	
+	cartLastTimeUsed at: aCartId put: clock now.
+	
+	^(cartsAndProducts at: aCartId) products.! !
+
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 20:56:51'!
+listPurchasesOf: aClientID with: aPassword
+	^ purchasedBooks at: aClientID! !
+
+
+!TusLibrosSystem methodsFor: 'authentication' stamp: 'DR 6/17/2018 20:10:46'!
+authenticate: aClientID using: aPassword
+
+	((clientsInfo includesKey: aClientID) and: [(clientsInfo at: aClientID) = aPassword])
+		ifFalse: [self error: self class failedToAuthenticateClientMessageError]
+	! !
+
+
+!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/17/2018 21:57:16'!
+initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
+
+	lastCartID _ 0.
+	catalog _ aCatalog.
+	merchantProcessor _ aMerchantProcessor.
+	clock _ aClock.
+	
+	clientsInfo _ clientIDsAndPasswords.
+	purchasedBooks _ Dictionary new.
+	clientIDsAndPasswords keys do: [ :clientID |
+		purchasedBooks at: clientID put: Bag new.
+	].
+	
+	cartsAndProducts _ Dictionary new.
+	cartOwners _ Dictionary new.
+	cartLastTimeUsed _ Dictionary new.
+	! !
+
+
+!TusLibrosSystem methodsFor: 'registering' stamp: 'DR 6/17/2018 20:45:36'!
+registerPurchasedBooksOf: aCart identifiedAs: aCartID
+
+	| clientID |
+	
+	clientID _ cartOwners at: aCartID.
+	(purchasedBooks at: clientID) addAll: aCart products.
+
+		! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -878,11 +1268,16 @@ listCart: aCartId
 TusLibrosSystem class
 	instanceVariableNames: ''!
 
-!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 02:48:04'!
-acceptingItems: aCatalog authenticatingWith: clientIDsAndPasswords
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'DR 6/17/2018 21:48:41'!
+acceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
 
-	^self new initializeAcceptingItems: aCatalog authenticatingWith: clientIDsAndPasswords
+	^self new initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
 ! !
+
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'DR 6/17/2018 21:55:43'!
+expiredCartMessageError
+
+	^'Se te venció el changito'! !
 
 !TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'np 6/16/2018 01:09:46'!
 failedToAuthenticateClientMessageError
