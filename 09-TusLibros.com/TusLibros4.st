@@ -332,13 +332,12 @@ test08BooksAddedToMultipleCartsByAUserGetListedInTheirRespectiveCarts
 	self assertListOf: aCartID isTheItemSoldByStoreRepeated: 7.
 	self assertListOf: anotherCartID isTheItemSoldByStoreRepeated: 5.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:31:01'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:54:05'!
 test09BooksAddedByMultipleUsersGetListedInTheirRespectiveCarts
 	| aCartID anotherCartID |
 
 	aCartID _ self createEmptyCartForUserA.
 	anotherCartID _ self createEmptyCartForUserB.
-		
 	self addToTusLibros: 3 ofItemSoldByStoreTo: aCartID.
 	self addToTusLibros: 98 ofItemSoldByStoreTo: anotherCartID.
 	
@@ -418,49 +417,54 @@ test13CanCheckOutCartWithUnexpiredCreditCardInThePast
 				on: (DateAndTime year: 1800 day: 0) 
 			].! !
 
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:45:43'!
+test13bCartStopsExistingWhenCheckedOut
+	
+	| cartID |
+	
+	cartID _ self createCartWithItems.
+	self successfulCheckoutOf: cartID.
+	
+	self assertFailureForUnexistingCartInTusLibrosSystemDoing: [
+			tusLibrosSystem listCart: cartID.
+		].
+	
+! !
+
 !TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:20:16'!
 test14PurchasesOfAUserOnANewSystemAreEmpty
 			
 	self assert: self purchasesOfUserA isEmpty.! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:37:27'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:53:39'!
 test15BooksOfASingleCheckoutCartAreListedInPurchases
 	| cartId purchases |
 	
-	cartId _ self createEmptyCartForUserA .
-	self addToTusLibros: 2 ofItemSoldByStoreTo: cartId.
-	self successfulCheckoutOf: cartId.
+	cartId _ self createAndCheckOutCartForUserAWithItemSoldQuantity: 2.
 
 	purchases _ self purchasesOfUserA.
 	
 	self assert: purchases isTheItemSoldByStoreRepeated: 2.
 ! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:37:36'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:53:10'!
 test16BooksOfMultipleCheckoutCartsAreListedInPurchases
-	| cartId purchases |
+	| purchases |
 	
-	cartId _ self createEmptyCartForUserA .
-	self addToTusLibros: 6 ofItemSoldByStoreTo: cartId.
-	self successfulCheckoutOf: cartId.
-	self successfulCheckoutOf: cartId.
+	self createAndCheckOutCartForUserAWithItemSoldQuantity: 6.
+	self createAndCheckOutCartForUserAWithItemSoldQuantity: 5.
 
 	purchases _ self purchasesOfUserA.
 	
-	self assert: purchases isTheItemSoldByStoreRepeated: 12.
+	self assert: purchases isTheItemSoldByStoreRepeated: 11.
 ! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:36:48'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:51:52'!
 test17BooksBoughtByDifferentUsersGetListedInTheirRespectiveLists
 	| firstCartId secondCartId firstPurchases secondPurchases |
 	
-	firstCartId _ self createEmptyCartForUserA.
-	self addToTusLibros: 1 ofItemSoldByStoreTo: firstCartId.
-	self successfulCheckoutOf: firstCartId.
-
-	secondCartId _ self createEmptyCartForUserB.
-	self addToTusLibros: 2 ofItemSoldByStoreTo: secondCartId.
-	self successfulCheckoutOf: secondCartId.
+	firstCartId _ self createAndCheckOutCartForUserAWithItemSoldQuantity: 1.
+	secondCartId _ self createAndCheckOutCartForUserBWithItemSoldQuantity: 2.
 	
 	firstPurchases _ self purchasesOfUserA.
 	secondPurchases _ tusLibrosSystem
@@ -480,7 +484,7 @@ test18ExpiredCartCanNotBeListed
 	
 	self assertFailureForExpiredCartInTusLibrosSystemDoing: [  tusLibrosSystem listCart: cartId ].! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:42:40'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:55:15'!
 test19ExpiredCartCanNotBeAddedTo
 	| cartId |
 	
@@ -489,9 +493,7 @@ test19ExpiredCartCanNotBeAddedTo
 	nowBehaviour _ [ testObjectsFactory december31Of2003 next: (TimeUnits minute with: 31) ].
 	
 	self assertFailureForExpiredCartInTusLibrosSystemDoing: [
-		self
-			addToTusLibros: 2
-			ofItemSoldByStoreTo: cartId 
+		self addToTusLibros: 2 ofItemSoldByStoreTo: cartId 
 		].! !
 
 !TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:25:09'!
@@ -535,18 +537,64 @@ test22AddingToCartExtendsItsExpirationDeadline
 	
 	self shouldntFail: [ tusLibrosSystem listCart: cartId ].! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 03:42:53'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:50:43'!
 test23CheckingOutCartExtendsItsExpirationDeadline
 	| cartId |
 	
 	nowBehaviour _ [ testObjectsFactory december31Of2003 ].
 	cartId _ self createEmptyCartForRegisteredUser .
-	tusLibrosSystem add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+	self addToTusLibros: 2 ofItemSoldByStoreTo: cartId.
 	nowBehaviour _ [ testObjectsFactory december31Of2003 next: (TimeUnits minute with: 15) ].
 	self successfulCheckoutOf: cartId.
 	nowBehaviour _ [ testObjectsFactory december31Of2003 next: (TimeUnits minute with: 31) ].
 	
 	self shouldntFail: [ tusLibrosSystem listCart: cartId ]
+! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:47:05'!
+test80PurchasedAmmountOfAUserOnANewSystemIsZero
+	| purchasedAmmount |
+		
+	purchasedAmmount _ self purchasedAmmountOfUserB.
+	
+	self assert: purchasedAmmount equals: 0.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:56:03'!
+test81CheckoutCartAddsToPurchasedAmmount
+	| purchasedAmmount |
+	
+	self createAndCheckOutCartForUserBWithItemSoldQuantity: 2.
+	purchasedAmmount _ self purchasedAmmountOfUserB.
+	
+	self assert: purchasedAmmount equals: testObjectsFactory itemSellByTheStorePrice * 2.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:49:50'!
+test82DifferentUsersShowTheirRespectivePurchasedAmmounts
+	| firstCartId firstPurchasedAmmount secondCartId secondPurchasedAmmount |
+	
+	firstCartId _ self createAndCheckOutCartForUserAWithItemSoldQuantity: 12.
+	secondCartId _ self createAndCheckOutCartForUserBWithItemSoldQuantity: 54.
+
+	firstPurchasedAmmount _ self purchasedAmmountOfUserA.
+	secondPurchasedAmmount _ self purchasedAmmountOfUserB.
+
+	self assert: firstPurchasedAmmount equals: testObjectsFactory itemSellByTheStorePrice *12.
+	self assert: secondPurchasedAmmount equals: testObjectsFactory itemSellByTheStorePrice *54.! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'np 6/18/2018 15:14:40'!
+test90CheckoutsGenerateDifferentTransactionIDs
+	
+	| firstTransactionID firstCartID secondCartID secondTransactionID |
+	
+	firstCartID _ self createCartWithItems.
+	secondCartID _ self createCartWithItems.
+	firstTransactionID _ self successfulCheckoutOf: firstCartID.
+	secondTransactionID _ self successfulCheckoutOf: secondCartID.
+	
+	self deny: firstTransactionID = secondTransactionID.
+	
 ! !
 
 
@@ -556,6 +604,24 @@ addToTusLibros: aQuantity ofItemSoldByStoreTo: aCartID
 		add: aQuantity
 		of: testObjectsFactory itemSellByTheStore
 		to: aCartID.! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 15:49:21'!
+createAndCheckOutCartForUserAWithItemSoldQuantity: anQuantityOfitemsSoldByStore
+	| cartID |
+	
+	cartID _ self createEmptyCartForUserA.
+	self addToTusLibros: anQuantityOfitemsSoldByStore ofItemSoldByStoreTo: cartID.
+	self successfulCheckoutOf: cartID.
+	^cartID! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 15:50:05'!
+createAndCheckOutCartForUserBWithItemSoldQuantity: anQuantityOfitemsSoldByStore
+	| cartID |
+	
+	cartID _ self createEmptyCartForUserB.
+	self addToTusLibros: anQuantityOfitemsSoldByStore ofItemSoldByStoreTo: cartID.
+	self successfulCheckoutOf: cartID.
+	^cartID! !
 
 !TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 03:07:21'!
 createCartWithItems
@@ -588,15 +654,27 @@ defaultTusLibrosSystem
 		authenticatingWith: testObjectsFactory defaultUsersAndPasswords
 		timingWith: self.! !
 
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 15:42:52'!
+purchasedAmmountOfUserA
+	^tusLibrosSystem
+		purchasedAmountOf: testObjectsFactory userARegisteredOnTusLibros 
+		with: testObjectsFactory thePasswordOfUserA .! !
+
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 15:42:58'!
+purchasedAmmountOfUserB
+	^tusLibrosSystem
+		purchasedAmountOf: testObjectsFactory userBRegisteredOnTusLibros 
+		with: testObjectsFactory thePasswordOfUserB .! !
+
 !TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 03:20:01'!
 purchasesOfUserA
 	^tusLibrosSystem
 		listPurchasesOf: testObjectsFactory userARegisteredOnTusLibros 
 		with: testObjectsFactory thePasswordOfUserA .! !
 
-!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 02:53:13'!
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/18/2018 15:09:28'!
 successfulCheckoutOf: aCartId 
-	tusLibrosSystem
+	^tusLibrosSystem
 		checkOut: aCartId
 		chargingOn: testObjectsFactory dummyCreditCardNumber
 		expiringOn: testObjectsFactory aMonthOfTheFuture
@@ -604,8 +682,9 @@ successfulCheckoutOf: aCartId
 		on: testObjectsFactory today.! !
 
 
-!TusLibrosSystemTest methodsFor: 'setup' stamp: 'np 6/18/2018 02:33:30'!
+!TusLibrosSystemTest methodsFor: 'setup' stamp: 'np 6/18/2018 15:57:46'!
 setUp
+
 	testObjectsFactory _ TusLibrosTestObjectsFactory new.
 	nowBehaviour _ [ testObjectsFactory december31Of2003 ].
 	tusLibrosSystem _ self defaultTusLibrosSystem.! !
@@ -1007,7 +1086,7 @@ of: aTotal
 
 !classDefinition: #TusLibrosSystem category: #TusLibros!
 Object subclass: #TusLibrosSystem
-	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock'
+	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock purchasedAmmounts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -1021,7 +1100,7 @@ add: aQuantity of: anISBN to: aCartId
 		add: aQuantity
 		of: anISBN.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:06:03'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'np 6/18/2018 15:56:50'!
 checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner on: aDate
 
 	| cart creditCard cashier owner total |
@@ -1046,20 +1125,20 @@ checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear owned
 	
 	owner _ (systemCarts at: aCartID) owner.
 	(purchasedBooks at: owner) addAll: cart products.
+	purchasedAmmounts at: owner put: ((purchasedAmmounts at: owner) + total).
 	
-	^total
+	systemCarts removeKey: aCartID.
+	^aCartID
 
 	
 
 		! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:05:23'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'np 6/18/2018 15:57:09'!
 createCartFor: aClientID with: aPassword
 	| cartId |
 	
-	self
-		authenticate: aClientID
-		using: aPassword.
+	self authenticate: aClientID using: aPassword.
 		
 	lastCartID _ lastCartID + 1.
 	cartId _ lastCartID.
@@ -1077,10 +1156,15 @@ listCart: aCartId
 	
 	^(systemCarts at: aCartId) products.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:10:47'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'np 6/18/2018 15:27:45'!
 listPurchasesOf: aClientID with: aPassword
 
 	^ (purchasedBooks at: aClientID) copy! !
+
+!TusLibrosSystem methodsFor: 'interface' stamp: 'np 6/18/2018 15:28:01'!
+purchasedAmountOf: aClientID with: aPassword
+
+	^ (purchasedAmmounts at: aClientID) copy! !
 
 
 !TusLibrosSystem methodsFor: 'authentication' stamp: 'DR 6/17/2018 20:10:46'!
@@ -1091,7 +1175,7 @@ authenticate: aClientID using: aPassword
 	! !
 
 
-!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/18/2018 00:59:22'!
+!TusLibrosSystem methodsFor: 'initialization' stamp: 'np 6/18/2018 15:28:31'!
 initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
 
 	lastCartID _ 0.
@@ -1100,8 +1184,10 @@ initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticati
 	clock _ aClock.
 	
 	clientsInfo _ clientIDsAndPasswords.
+	purchasedAmmounts _ Dictionary new.
 	purchasedBooks _ Dictionary new.
 	clientIDsAndPasswords keys do: [ :clientID |
+		purchasedAmmounts at: clientID put: 0.
 		purchasedBooks at: clientID put: Bag new.
 	].
 	
