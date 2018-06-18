@@ -721,6 +721,34 @@ test23CheckingOutCartExtendsItsExpirationDeadline
 			tusLibros listCart: cartId. ]
 		raise: Error - MessageNotUnderstood! !
 
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/18/2018 13:53:34'!
+test90CheckoutsGenerateDifferentTransactionIDs
+	
+	| aClientID aPassword clientsIDsAndPasswords tusLibros firstTransactionID firstCartID secondCartID secondTransactionID |
+	
+	aClientID _ 'Jorge'.
+	aPassword _ 1234.
+	
+	clientsIDsAndPasswords _ Dictionary with: aClientID->aPassword.
+	
+	tusLibros _ TusLibrosSystem
+		acceptingItems: testObjectsFactory defaultCatalog 
+		chargingWith: self
+		authenticatingWith: clientsIDsAndPasswords
+		timingWith: self.
+	
+	firstCartID _ tusLibros createCartFor: aClientID with: aPassword .
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: firstCartID.
+	firstTransactionID _ self successfulCheckoutOf: firstCartID in: tusLibros.
+	
+	secondCartID _ tusLibros createCartFor: aClientID with: aPassword .
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: secondCartID.
+	secondTransactionID _ self successfulCheckoutOf: secondCartID in: tusLibros.
+	
+	self deny: firstTransactionID = secondTransactionID.
+	
+! !
+
 
 !TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/16/2018 02:56:09'!
 aUserNotRegisteredOnTusLibros
@@ -793,9 +821,9 @@ setUp
 	nowBehaviour _ [ self december31Of2003 ].
 ! !
 
-!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/17/2018 20:28:48'!
+!TusLibrosSystemTest methodsFor: 'support' stamp: 'DR 6/18/2018 13:50:43'!
 successfulCheckoutOf: aCartId in: tusLibrosSystem
-	tusLibrosSystem
+	^tusLibrosSystem
 		checkOut: aCartId
 		chargingOn: self dummyCreditCardNumber
 		expiringOn: testObjectsFactory aMonthOfTheFuture
@@ -1204,7 +1232,7 @@ today
 
 !classDefinition: #TusLibrosSystem category: #TusLibros!
 Object subclass: #TusLibrosSystem
-	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock'
+	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock lastTransactionID'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -1218,10 +1246,10 @@ add: aQuantity of: anISBN to: aCartId
 		add: aQuantity
 		of: anISBN.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:06:03'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 13:55:20'!
 checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner on: aDate
 
-	| cart creditCard cashier owner total |
+	| cart creditCard cashier owner |
 	
 	self assertExistingCart: aCartID.
 		
@@ -1239,12 +1267,13 @@ checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear owned
 		on: aDate
 		registeringOn: OrderedCollection new.
 	
-	total _ cashier checkOut.
+	cashier checkOut.
 	
 	owner _ (systemCarts at: aCartID) owner.
 	(purchasedBooks at: owner) addAll: cart products.
 	
-	^total
+	lastTransactionID _ lastTransactionID + 1.
+	^lastTransactionID
 
 	
 
@@ -1288,10 +1317,12 @@ authenticate: aClientID using: aPassword
 	! !
 
 
-!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/18/2018 00:59:22'!
+!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/18/2018 13:54:30'!
 initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
 
 	lastCartID _ 0.
+	lastTransactionID _ 0.
+	
 	catalog _ aCatalog.
 	merchantProcessor _ aMerchantProcessor.
 	clock _ aClock.
