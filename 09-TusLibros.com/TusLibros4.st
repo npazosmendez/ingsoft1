@@ -721,6 +721,66 @@ test23CheckingOutCartExtendsItsExpirationDeadline
 			tusLibros listCart: cartId. ]
 		raise: Error - MessageNotUnderstood! !
 
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/18/2018 14:00:16'!
+test80purchasedAmmountOfAUserOnANewSystemIsZero
+	| tusLibros purchasedAmmount |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	
+	purchasedAmmount _ tusLibros
+		purchasedAmountOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	
+	self assert: purchasedAmmount equals: 0.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/18/2018 14:01:41'!
+test81checkoutCartAddsToPurchasedAmmount
+	| tusLibros purchasedAmmount cartId |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+	cartId _ self emptyCartIn: tusLibros.
+	
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: cartId.
+	
+	self successfulCheckoutOf: cartId in: tusLibros.
+	
+	purchasedAmmount _ tusLibros
+		purchasedAmountOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	
+	self assert: purchasedAmmount equals: 20.
+	! !
+
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/18/2018 14:04:42'!
+test82differentUsersShowTheirRespectivePurchasedAmmounts
+	| tusLibros firstCartId firstPurchasedAmmount secondCartId secondPurchasedAmmount |
+	
+	tusLibros _ self defaultTusLibrosSystem.
+
+	firstCartId _ tusLibros
+		createCartFor: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+	tusLibros add: 1 of: testObjectsFactory itemSellByTheStore to: firstCartId.
+	self successfulCheckoutOf: firstCartId in: tusLibros.
+	
+	secondCartId _ tusLibros
+		createCartFor: 'Marianuli'
+		with: 1111.
+	tusLibros add: 2 of: testObjectsFactory itemSellByTheStore to: secondCartId.
+	self successfulCheckoutOf: secondCartId in: tusLibros.
+	
+	firstPurchasedAmmount _ tusLibros
+		purchasedAmountOf: self aUserRegisteredOnTusLibros
+		with: self thePasswordOfTheUserOfTusLibros.
+
+	secondPurchasedAmmount _ tusLibros
+		purchasedAmountOf: 'Marianuli'
+		with: 1111.
+	
+	self assert: firstPurchasedAmmount equals: 10.
+	self assert: secondPurchasedAmmount equals: 20.! !
+
 
 !TusLibrosSystemTest methodsFor: 'support' stamp: 'np 6/16/2018 02:56:09'!
 aUserNotRegisteredOnTusLibros
@@ -1204,7 +1264,7 @@ today
 
 !classDefinition: #TusLibrosSystem category: #TusLibros!
 Object subclass: #TusLibrosSystem
-	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock'
+	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock purchasedAmmount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -1218,7 +1278,7 @@ add: aQuantity of: anISBN to: aCartId
 		add: aQuantity
 		of: anISBN.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:06:03'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 14:08:45'!
 checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner on: aDate
 
 	| cart creditCard cashier owner total |
@@ -1243,6 +1303,7 @@ checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear owned
 	
 	owner _ (systemCarts at: aCartID) owner.
 	(purchasedBooks at: owner) addAll: cart products.
+	purchasedAmmount at: owner put: ((purchasedAmmount at: owner) + total).
 	
 	^total
 
@@ -1279,6 +1340,11 @@ listPurchasesOf: aClientID with: aPassword
 
 	^ (purchasedBooks at: aClientID) copy! !
 
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 14:07:11'!
+purchasedAmountOf: aClientID with: aPassword
+
+	^ (purchasedAmmount at: aClientID) copy! !
+
 
 !TusLibrosSystem methodsFor: 'authentication' stamp: 'DR 6/17/2018 20:10:46'!
 authenticate: aClientID using: aPassword
@@ -1288,7 +1354,7 @@ authenticate: aClientID using: aPassword
 	! !
 
 
-!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/18/2018 00:59:22'!
+!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/18/2018 14:07:46'!
 initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
 
 	lastCartID _ 0.
@@ -1298,8 +1364,10 @@ initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticati
 	
 	clientsInfo _ clientIDsAndPasswords.
 	purchasedBooks _ Dictionary new.
+	purchasedAmmount _ Dictionary new.
 	clientIDsAndPasswords keys do: [ :clientID |
 		purchasedBooks at: clientID put: Bag new.
+		purchasedAmmount at: clientID put: 0.
 	].
 	
 	systemCarts _ Dictionary new.! !
