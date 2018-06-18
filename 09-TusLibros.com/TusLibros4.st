@@ -510,8 +510,8 @@ test13CanCheckOutCartWithUnexpiredCreditCardInThePast
 		raise: Error - MessageNotUnderstood.
 	! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 22:18:37'!
-test14PurchasesOfNewUserAreEmpty
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/18/2018 01:14:46'!
+test14PurchasesOfAUserOnANewSystemAreEmpty
 	| tusLibros purchases |
 	
 	tusLibros _ self defaultTusLibrosSystem.
@@ -596,7 +596,7 @@ test17BooksBoughtByDifferentUsersGetListedInTheirRespectiveLists
 
 	! !
 
-!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/17/2018 23:39:41'!
+!TusLibrosSystemTest methodsFor: 'tests' stamp: 'DR 6/18/2018 00:57:37'!
 test18ExpiredCartCanNotBeListed
 	| tusLibros cartId |
 	
@@ -896,6 +896,83 @@ acceptingItemsOf: aCatalog
 	^self new initializeAcceptingItemsOf: aCatalog ! !
 
 
+!classDefinition: #SystemCart category: #TusLibros!
+Cart subclass: #SystemCart
+	instanceVariableNames: 'owner clock lastTimeUsed'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!SystemCart methodsFor: 'initialization' stamp: 'DR 6/18/2018 00:49:50'!
+initializeAcceptingItemsOf: aCatalog ownedBy: anOwner timedWith: aClock
+	super initializeAcceptingItemsOf: aCatalog.
+	owner _ anOwner.
+	clock _ aClock.
+	lastTimeUsed _ clock now.! !
+
+
+!SystemCart methodsFor: 'timing' stamp: 'DR 6/18/2018 00:45:50'!
+assertIIsNotExpiredAndUpdateTimeStamp
+	(clock now > (lastTimeUsed next: (TimeUnits minute with: 30)))
+		ifTrue: [self error: self class expiredCartMessageError].
+	lastTimeUsed _ clock now.! !
+
+
+!SystemCart methodsFor: 'total' stamp: 'DR 6/18/2018 00:46:28'!
+total
+	self assertIIsNotExpiredAndUpdateTimeStamp.
+	^super total! !
+
+
+!SystemCart methodsFor: 'adding' stamp: 'DR 6/18/2018 00:45:58'!
+add: anItem
+	self assertIIsNotExpiredAndUpdateTimeStamp.
+	^super add: anItem.! !
+
+!SystemCart methodsFor: 'adding' stamp: 'DR 6/18/2018 00:46:05'!
+add: aQuantity of: anItem
+	self assertIIsNotExpiredAndUpdateTimeStamp.
+	^super add: aQuantity of: anItem! !
+
+
+!SystemCart methodsFor: 'testing' stamp: 'DR 6/18/2018 00:46:12'!
+includes: anItem
+	self assertIIsNotExpiredAndUpdateTimeStamp.
+	^super includes: anItem! !
+
+
+!SystemCart methodsFor: 'queries' stamp: 'DR 6/18/2018 00:46:19'!
+occurrencesOf: anItem
+	self assertIIsNotExpiredAndUpdateTimeStamp.
+	^super occurrencesOf: anItem! !
+
+!SystemCart methodsFor: 'queries' stamp: 'DR 6/18/2018 00:46:23'!
+products
+	self assertIIsNotExpiredAndUpdateTimeStamp.
+	^super products! !
+
+
+!SystemCart methodsFor: 'owner' stamp: 'DR 6/18/2018 00:57:02'!
+owner
+	^owner! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'SystemCart class' category: #TusLibros!
+SystemCart class
+	instanceVariableNames: ''!
+
+!SystemCart class methodsFor: 'as yet unclassified' stamp: 'DR 6/18/2018 00:37:46'!
+acceptingItemsOf: aCatalog ownedBy: anOwner timedWith: aClock
+
+	^ self new initializeAcceptingItemsOf: aCatalog ownedBy: anOwner timedWith: aClock.! !
+
+!SystemCart class methodsFor: 'as yet unclassified' stamp: 'DR 6/18/2018 00:42:17'!
+expiredCartMessageError
+
+	^'Se te venció el changito'! !
+
+
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
 	instanceVariableNames: 'cart salesBook merchantProcessor creditCard total'
@@ -1127,40 +1204,28 @@ today
 
 !classDefinition: #TusLibrosSystem category: #TusLibros!
 Object subclass: #TusLibrosSystem
-	instanceVariableNames: 'clientsInfo lastCartID catalog cartsAndProducts merchantProcessor purchasedBooks cartOwners clock cartLastTimeUsed'
+	instanceVariableNames: 'clientsInfo lastCartID catalog systemCarts merchantProcessor purchasedBooks clock'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 22:41:59'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:02:31'!
 add: aQuantity of: anISBN to: aCartId
 
-	(cartsAndProducts includesKey: aCartId)
-		ifFalse: [ self error: self class unexistingCartErrorMessage ].
+	self assertExistingCart: aCartId.
 		
-	(clock now > ((cartLastTimeUsed at: aCartId) next: (TimeUnits minute with: 30)))
-		ifTrue: [self error: self class expiredCartMessageError].
-
-	cartLastTimeUsed at: aCartId put: clock now.
-		
-	(cartsAndProducts at: aCartId)
+	(systemCarts at: aCartId)
 		add: aQuantity
 		of: anISBN.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 22:43:07'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:06:03'!
 checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear ownedBy: aCreditCardOwner on: aDate
 
-	| cart creditCard cashier |
+	| cart creditCard cashier owner total |
 	
-	(cartsAndProducts includesKey: aCartID)
-		ifFalse: [ self error: self class unexistingCartErrorMessage ].
-	
-	(clock now > ((cartLastTimeUsed at: aCartID) next: (TimeUnits minute with: 30)))
-		ifTrue: [self error: self class expiredCartMessageError].
+	self assertExistingCart: aCartID.
 		
-	cartLastTimeUsed at: aCartID put: clock now.
-		
-	cart _ cartsAndProducts at: aCartID.
+	cart _ systemCarts at: aCartID.
 		
 	creditCard _ CreditCard 
 		with: aCreditCardNumber 
@@ -1174,17 +1239,21 @@ checkOut: aCartID chargingOn: aCreditCardNumber expiringOn: aMonthOfAnYear owned
 		on: aDate
 		registeringOn: OrderedCollection new.
 	
-	self registerPurchasedBooksOf: cart identifiedAs: aCartID.
+	total _ cashier checkOut.
 	
-	^cashier checkOut
+	owner _ (systemCarts at: aCartID) owner.
+	(purchasedBooks at: owner) addAll: cart products.
+	
+	^total
 
 	
 
 		! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 21:58:02'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:05:23'!
 createCartFor: aClientID with: aPassword
 	| cartId |
+	
 	self
 		authenticate: aClientID
 		using: aPassword.
@@ -1192,36 +1261,23 @@ createCartFor: aClientID with: aPassword
 	lastCartID _ lastCartID + 1.
 	cartId _ lastCartID.
 	
-	cartsAndProducts
+	systemCarts
 		at: cartId
-		put: (Cart acceptingItemsOf: catalog).
-	
-	cartOwners
-		at: cartId
-		put: aClientID.
-	
-	cartLastTimeUsed
-		at: cartId
-		put: clock now.
+		put: (SystemCart acceptingItemsOf: catalog ownedBy: aClientID timedWith: clock).
 		
 	^ cartId.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 22:41:21'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:03:10'!
 listCart: aCartId
 
-	(cartsAndProducts includesKey: aCartId)
-		ifFalse: [ self error: self class unexistingCartErrorMessage ].
-
-	(clock now > ((cartLastTimeUsed at: aCartId) next: (TimeUnits minute with: 30)))
-		ifTrue: [self error: self class expiredCartMessageError].
+	self assertExistingCart: aCartId.
 	
-	cartLastTimeUsed at: aCartId put: clock now.
-	
-	^(cartsAndProducts at: aCartId) products.! !
+	^(systemCarts at: aCartId) products.! !
 
-!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/17/2018 20:56:51'!
+!TusLibrosSystem methodsFor: 'interface' stamp: 'DR 6/18/2018 01:10:47'!
 listPurchasesOf: aClientID with: aPassword
-	^ purchasedBooks at: aClientID! !
+
+	^ (purchasedBooks at: aClientID) copy! !
 
 
 !TusLibrosSystem methodsFor: 'authentication' stamp: 'DR 6/17/2018 20:10:46'!
@@ -1232,7 +1288,7 @@ authenticate: aClientID using: aPassword
 	! !
 
 
-!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/17/2018 21:57:16'!
+!TusLibrosSystem methodsFor: 'initialization' stamp: 'DR 6/18/2018 00:59:22'!
 initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticatingWith: clientIDsAndPasswords timingWith: aClock
 
 	lastCartID _ 0.
@@ -1246,21 +1302,15 @@ initializeAcceptingItems: aCatalog chargingWith: aMerchantProcessor authenticati
 		purchasedBooks at: clientID put: Bag new.
 	].
 	
-	cartsAndProducts _ Dictionary new.
-	cartOwners _ Dictionary new.
-	cartLastTimeUsed _ Dictionary new.
-	! !
+	systemCarts _ Dictionary new.! !
 
 
-!TusLibrosSystem methodsFor: 'registering' stamp: 'DR 6/17/2018 20:45:36'!
-registerPurchasedBooksOf: aCart identifiedAs: aCartID
+!TusLibrosSystem methodsFor: 'asserts' stamp: 'DR 6/18/2018 01:02:47'!
+assertExistingCart: aCartId.
 
-	| clientID |
-	
-	clientID _ cartOwners at: aCartID.
-	(purchasedBooks at: clientID) addAll: aCart products.
-
-		! !
+	(systemCarts includesKey: aCartId)
+		ifFalse: [ self error: self class unexistingCartErrorMessage ].
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
