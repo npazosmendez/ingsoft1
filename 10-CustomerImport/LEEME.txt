@@ -1,0 +1,4 @@
+Sería  buena idea que los Party tengan un 'identification' en vez de 'identificationNumber/Type'
+Es decir, tener una clase PartyIdentificaction que una esas cosas. Además, esa variable, junto con
+'addresses', podría estar en la superclase Party, y asimismo todos los mensajes básicos que las consulten.
+Lo hicimos, pero al hacerlo surgían problemas con la base de datos que no supimos solucionar."
